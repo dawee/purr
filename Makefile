@@ -1,2 +1,4 @@
-deps/v8:
-	@make -C deps v8
+deps:
+	@make -C deps all
+
+.PHONY: deps
