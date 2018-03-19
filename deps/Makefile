@@ -8,6 +8,5 @@ v8/Makefile: v8
 
 v8:
 	@fetch v8
-	@gclient sync
 
 .PHONY: v8-release
