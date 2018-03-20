@@ -1,4 +1,10 @@
-all: v8-release
+all: v8-release include/v8
+
+include/v8: include v8
+	@cp -r v8/include include/v8
+
+include:
+	@mkdir include
 
 v8-release: v8/Makefile
 	@make -C v8 release
