@@ -35,8 +35,8 @@ int main(int argc, char* argv[]) {
   script.assign((std::istreambuf_iterator<char>(scriptFile)), std::istreambuf_iterator<char>());
   scriptFile.close();
 
-  std::unique_ptr<v8::Platform> platform = v8::platform::NewDefaultPlatform();
-  v8::V8::InitializePlatform(platform.get());
+  v8::Platform* platform = v8::platform::CreateDefaultPlatform();
+  v8::V8::InitializePlatform(platform);
   v8::V8::Initialize();
   v8::Isolate::CreateParams create_params;
   create_params.array_buffer_allocator =
