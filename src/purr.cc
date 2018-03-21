@@ -11,8 +11,8 @@
 #include <v8/libplatform/libplatform.h>
 #include <v8/v8.h>
 
-#define SCREEN_WIDTH 640
-#define SCREEN_HEIGHT 480
+#define SCREEN_WIDTH 800
+#define SCREEN_HEIGHT 600
 
 using namespace std;
 
@@ -101,7 +101,7 @@ int main(int argc, char* argv[]) {
 
   SDL_SetWindowBordered(window, SDL_TRUE);
   screenSurface = SDL_GetWindowSurface(window);
-  SDL_FillRect(screenSurface, NULL, SDL_MapRGB(screenSurface->format, 0xFF, 0xFF, 0xFF));
+  SDL_FillRect(screenSurface, NULL, SDL_MapRGB(screenSurface->format, 0, 0, 0));
   SDL_UpdateWindowSurface(window);
 
   v8::Platform* platform = v8::platform::CreateDefaultPlatform();
@@ -126,15 +126,21 @@ int main(int argc, char* argv[]) {
     v8::Local<v8::Script> script = v8::Script::Compile(context, source).ToLocalChecked();
     v8::Local<v8::Value> result = script->Run(context).ToLocalChecked();
     v8::String::Utf8Value utf8(isolate, result);
+    SDL_Event event;
+    bool quit = false;
 
-    for (int i = 0; i < 2000; i++) {
-      SDL_PumpEvents();
-      SDL_Delay(1);
+    while (!quit) {
+      while (SDL_PollEvent(&event) != 0) {
+        if (event.type == SDL_QUIT || (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE)) {
+          SDL_HideWindow(window);
+          quit = true;
+        }
+      }
     }
 
     printf("script result: %s\n", *utf8);
   }
-  // Dispose the isolate and tear down V8.
+
   isolate->Dispose();
   v8::V8::Dispose();
   v8::V8::ShutdownPlatform();
