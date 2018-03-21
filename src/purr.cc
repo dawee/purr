@@ -7,8 +7,12 @@
 #include <fstream>
 #include <streambuf>
 
-#include "v8/libplatform/libplatform.h"
-#include "v8/v8.h"
+#include <SDL2/SDL.h>
+#include <v8/libplatform/libplatform.h>
+#include <v8/v8.h>
+
+#define SCREEN_WIDTH 640
+#define SCREEN_HEIGHT 480
 
 using namespace std;
 
@@ -34,6 +38,15 @@ int main(int argc, char* argv[]) {
   scriptFile.seekg(0, std::ios::beg);
   script.assign((std::istreambuf_iterator<char>(scriptFile)), std::istreambuf_iterator<char>());
   scriptFile.close();
+
+
+  SDL_Window* window = NULL;
+  SDL_Surface* screenSurface = NULL;
+
+  if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+    fprintf(stderr, "could not initialize sdl2: %s\n", SDL_GetError());
+    return 1;
+  }
 
   v8::Platform* platform = v8::platform::CreateDefaultPlatform();
   v8::V8::InitializePlatform(platform);
