@@ -1,4 +1,7 @@
-const name = 'dawee';
+exports.update = dt => {
+  console.log('update');
+};
 
-
-`Hi ! I'm ${name}`;
+exports.draw = () => {
+  console.log('draw');
+};

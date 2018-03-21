@@ -16,6 +16,44 @@
 
 using namespace std;
 
+class ExportsHolder {
+
+  private:
+    ExportsHolder() {
+      mainExports = NULL;
+    }
+
+    v8::Persistent<v8::Object> * mainExports;
+    static ExportsHolder * instance;
+
+  public:
+    static ExportsHolder * Instance() {
+      if (instance == NULL) {
+        instance = new ExportsHolder();
+      }
+
+      return instance;
+    }
+
+    v8::Persistent<v8::Object> * getMainExports(v8::Isolate * isolate) {
+      if (mainExports == NULL) {
+        v8::Local<v8::Object> localExports = v8::Object::New(isolate);
+        mainExports = new v8::Persistent<v8::Object>(isolate, localExports);
+      }
+
+      return mainExports;
+    }
+
+};
+
+ExportsHolder * ExportsHolder::instance = NULL;
+
+void ExportsGetter(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+  v8::Local<v8::Object> self = info.Holder();
+  v8::Persistent<v8::Object> *  exports = ExportsHolder::Instance()->getMainExports(self->GetIsolate());
+  info.GetReturnValue().Set(*exports);
+}
+
 int main(int argc, char* argv[]) {
   if (argc != 2) {
     printf("usage:\n\tpurr <filename>\n");
@@ -31,12 +69,12 @@ int main(int argc, char* argv[]) {
     return 1;
   }
 
-  string script;
+  string scriptSource;
 
   scriptFile.seekg(0, std::ios::end);
-  script.reserve(scriptFile.tellg());
+  scriptSource.reserve(scriptFile.tellg());
   scriptFile.seekg(0, std::ios::beg);
-  script.assign((std::istreambuf_iterator<char>(scriptFile)), std::istreambuf_iterator<char>());
+  scriptSource.assign((std::istreambuf_iterator<char>(scriptFile)), std::istreambuf_iterator<char>());
   scriptFile.close();
 
 
@@ -77,12 +115,15 @@ int main(int argc, char* argv[]) {
   {
     v8::Isolate::Scope isolate_scope(isolate);
     v8::HandleScope handle_scope(isolate);
-    v8::Local<v8::Context> context = v8::Context::New(isolate);
+
+    v8::Local<v8::ObjectTemplate> moduleTemplate = v8::ObjectTemplate::New(isolate);
+    moduleTemplate->SetAccessor(v8::String::NewFromUtf8(isolate, "exports"), &ExportsGetter);
+
+    v8::Local<v8::Context> context = v8::Context::New(isolate, NULL, moduleTemplate);
     v8::Context::Scope context_scope(context);
     v8::Local<v8::String> source =
-    v8::String::NewFromUtf8(isolate, script.c_str(), v8::NewStringType::kNormal).ToLocalChecked();
-    v8::Local<v8::Script> script =
-    v8::Script::Compile(context, source).ToLocalChecked();
+    v8::String::NewFromUtf8(isolate, scriptSource.c_str(), v8::NewStringType::kNormal).ToLocalChecked();
+    v8::Local<v8::Script> script = v8::Script::Compile(context, source).ToLocalChecked();
     v8::Local<v8::Value> result = script->Run(context).ToLocalChecked();
     v8::String::Utf8Value utf8(isolate, result);
 
