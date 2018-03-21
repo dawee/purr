@@ -48,6 +48,23 @@ int main(int argc, char* argv[]) {
     return 1;
   }
 
+
+  window = SDL_CreateWindow(
+ 			    argv[1],
+ 			    SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+ 			    SCREEN_WIDTH, SCREEN_HEIGHT,
+ 			    SDL_WINDOW_SHOWN
+ 			    );
+
+  if (window == NULL) {
+    fprintf(stderr, "could not create window: %s\n", SDL_GetError());
+    return 1;
+  }
+
+  screenSurface = SDL_GetWindowSurface(window);
+  SDL_FillRect(screenSurface, NULL, SDL_MapRGB(screenSurface->format, 0xFF, 0xFF, 0xFF));
+  SDL_UpdateWindowSurface(window);
+
   v8::Platform* platform = v8::platform::CreateDefaultPlatform();
   v8::V8::InitializePlatform(platform);
   v8::V8::Initialize();
@@ -75,5 +92,9 @@ int main(int argc, char* argv[]) {
   v8::V8::Dispose();
   v8::V8::ShutdownPlatform();
   delete create_params.array_buffer_allocator;
+
+  SDL_Delay(2000);
+  SDL_DestroyWindow(window);
+  SDL_Quit();
   return 0;
 }
