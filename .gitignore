@@ -1,4 +1,4 @@
 dist
 deps/*
 !deps/Makefile
-!deps/v8.mk
+!deps/*.mk
