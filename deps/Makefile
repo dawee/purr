@@ -17,7 +17,7 @@ include/SDL2: include SDL2-2.0.8
 include:
 	@mkdir include
 
-SDL2-2.0.8/purr.sdl2.mk: v8 sdl2.mk
+SDL2-2.0.8/purr.sdl2.mk: SDL2-2.0.8 sdl2.mk
 	@cp sdl2.mk $@
 
 v8/purr.v8.mk: v8 v8.mk
