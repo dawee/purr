@@ -61,6 +61,7 @@ int main(int argc, char* argv[]) {
     return 1;
   }
 
+  SDL_SetWindowBordered(window, SDL_TRUE);
   screenSurface = SDL_GetWindowSurface(window);
   SDL_FillRect(screenSurface, NULL, SDL_MapRGB(screenSurface->format, 0xFF, 0xFF, 0xFF));
   SDL_UpdateWindowSurface(window);
@@ -85,6 +86,11 @@ int main(int argc, char* argv[]) {
     v8::Local<v8::Value> result = script->Run(context).ToLocalChecked();
     v8::String::Utf8Value utf8(isolate, result);
 
+    for (int i = 0; i < 2000; i++) {
+      SDL_PumpEvents();
+      SDL_Delay(1);
+    }
+
     printf("script result: %s\n", *utf8);
   }
   // Dispose the isolate and tear down V8.
@@ -93,7 +99,6 @@ int main(int argc, char* argv[]) {
   v8::V8::ShutdownPlatform();
   delete create_params.array_buffer_allocator;
 
-  SDL_Delay(2000);
   SDL_DestroyWindow(window);
   SDL_Quit();
   return 0;
