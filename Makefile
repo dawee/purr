@@ -31,8 +31,14 @@ all: dist/purr
 
 re: clean all
 
-dist/purr: src/purr.cc dist deps
-	@${CXX} ${V8_OBJECTS} ${SDL2_OBJECTS} src/purr.cc -o $@ ${CXX_FLAGS}
+dist/purr: build/module.o build/project.o build/purr.o
+	@${CXX} ${V8_OBJECTS} ${SDL2_OBJECTS} build/module.o build/project.o build/purr.o -o $@ ${CXX_FLAGS}
+
+build/%.o: src/%.cc build
+	@${CXX} ${V8_OBJECTS} ${SDL2_OBJECTS} -c $< -o $@ ${CXX_FLAGS}
+
+build:
+	@mkdir build
 
 dist:
 	@mkdir dist
