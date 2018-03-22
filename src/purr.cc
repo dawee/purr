@@ -24,7 +24,7 @@ class ExportsHolder {
   private:
     ExportsHolder() {}
 
-    std::map<std::string, v8::Persistent<v8::Object> *> savedExports;
+    std::map<std::string, v8::Persistent<v8::Value> *> savedExports;
 
     static ExportsHolder * instance;
 
@@ -37,13 +37,21 @@ class ExportsHolder {
       return instance;
     }
 
-    v8::Persistent<v8::Object> * getExports(v8::Isolate * isolate, std::string name) {
+    v8::Persistent<v8::Value> * getExports(v8::Isolate * isolate, std::string name) {
       if (savedExports.count(name) == 0) {
-        v8::Local<v8::Object> localExports = v8::Object::New(isolate);
-        savedExports[name] = new v8::Persistent<v8::Object>(isolate, localExports);
+        v8::Local<v8::Object> exports = v8::Object::New(isolate);
+        savedExports[name] = new v8::Persistent<v8::Value>(isolate, exports);
       }
 
       return savedExports[name];
+    }
+
+    void setExports(v8::Isolate * isolate, std::string name, v8::Local<v8::Value> exports) {
+      if (savedExports.count(name) > 0) {
+        savedExports[name]->Reset();
+      }
+
+      savedExports[name] = new v8::Persistent<v8::Value>(isolate, exports);
     }
 
 };
@@ -51,14 +59,30 @@ class ExportsHolder {
 ExportsHolder * ExportsHolder::instance = NULL;
 
 void ExportsGetter(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
-  v8::Local<v8::Object> self = info.Holder();
+  v8::Local<v8::Object> module = info.Holder();
 
-  v8::Local<v8::String> filename = self->Get(v8::String::NewFromUtf8(self->GetIsolate(), "__filename__"))->ToString();
+  v8::Local<v8::String> filename = module->Get(v8::String::NewFromUtf8(module->GetIsolate(), "__filename__"))->ToString();
   v8::String::Utf8Value filenameUTF8(filename);
   std::string fileNameStr(*filenameUTF8);
 
-  v8::Persistent<v8::Object> * exports = ExportsHolder::Instance()->getExports(self->GetIsolate(), fileNameStr);
+  v8::Persistent<v8::Value> * exports = ExportsHolder::Instance()->getExports(module->GetIsolate(), fileNameStr);
   info.GetReturnValue().Set(*exports);
+}
+
+void ExportsSetter(v8::Local<v8::String > property, v8::Local<v8::Value > value, const v8::PropertyCallbackInfo<void> &info) {
+  v8::Local<v8::Object> module = info.Holder();
+
+  v8::Local<v8::String> filename = module->Get(v8::String::NewFromUtf8(module->GetIsolate(), "__filename__"))->ToString();
+  v8::String::Utf8Value filenameUTF8(filename);
+  std::string fileNameStr(*filenameUTF8);
+
+  ExportsHolder::Instance()->setExports(module->GetIsolate(), fileNameStr, value);
+}
+
+
+void ModuleGetter(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+  v8::Local<v8::Object> module = info.Holder();
+  info.GetReturnValue().Set(module);
 }
 
 int main(int argc, char* argv[]) {
@@ -126,7 +150,8 @@ int main(int argc, char* argv[]) {
     v8::HandleScope handle_scope(isolate);
 
     v8::Local<v8::ObjectTemplate> moduleTemplate = v8::ObjectTemplate::New(isolate);
-    moduleTemplate->SetAccessor(v8::String::NewFromUtf8(isolate, "exports"), &ExportsGetter);
+    moduleTemplate->SetAccessor(v8::String::NewFromUtf8(isolate, "exports"), &ExportsGetter, &ExportsSetter);
+    moduleTemplate->SetAccessor(v8::String::NewFromUtf8(isolate, "module"), &ModuleGetter);
 
     v8::Local<v8::Context> context = v8::Context::New(isolate, NULL, moduleTemplate);
     v8::Context::Scope context_scope(context);

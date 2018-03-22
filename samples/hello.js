@@ -1,9 +1,12 @@
-exports.update = dt => {
+const update = dt => {
   console.log('update');
 };
 
-exports.draw = () => {
+const draw = () => {
   console.log('draw');
 };
 
-__filename__
+module.exports = {draw, update};
+
+
+exports.update;
