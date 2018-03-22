@@ -1,13 +1,15 @@
 UNAME := $(shell uname)
 
+INCLUDES = -I./deps/include -I./deps/include/v8 -I.
+
 ifeq ($(UNAME), Linux)
 	CXX := g++
-	CXX_FLAGS := -I./deps/include -I./deps/include/v8 -I./deps/include/SDL2 --std=c++11 -pthread -ldl
+	CXX_FLAGS := ${INCLUDES} --std=c++11 -pthread -ldl
 endif
 
 ifeq ($(UNAME), Darwin)
 	CXX := clang++
-	CXX_FLAGS := -I./deps/include -I./deps/include/v8 -I./deps/include/SDL2 --std=c++11 -pthread -liconv -lobjc -framework OpenGL -framework ForceFeedback -lobjc -framework Cocoa -framework Carbon -framework IOKit -framework CoreAudio -framework CoreVideo -framework Metal -framework AudioToolbox -framework AudioUnit
+	CXX_FLAGS := ${INCLUDES} --std=c++11 -pthread -liconv -lobjc -framework OpenGL -framework ForceFeedback -lobjc -framework Cocoa -framework Carbon -framework IOKit -framework CoreAudio -framework CoreVideo -framework Metal -framework AudioToolbox -framework AudioUnit
 endif
 
 V8_OBJECTS = \

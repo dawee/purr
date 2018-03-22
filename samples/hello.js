@@ -5,3 +5,5 @@ exports.update = dt => {
 exports.draw = () => {
   console.log('draw');
 };
+
+__filename__

@@ -10,6 +10,8 @@
 #include <SDL2/SDL.h>
 #include <v8/libplatform/libplatform.h>
 #include <v8/v8.h>
+#include <filesystem/path.h>
+#include <filesystem/resolver.h>
 
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 600
@@ -61,6 +63,8 @@ int main(int argc, char* argv[]) {
   }
 
   ifstream scriptFile;
+
+  filesystem::path filePath(argv[1]);
 
   scriptFile.open(argv[1]);
 
@@ -121,8 +125,21 @@ int main(int argc, char* argv[]) {
 
     v8::Local<v8::Context> context = v8::Context::New(isolate, NULL, moduleTemplate);
     v8::Context::Scope context_scope(context);
-    v8::Local<v8::String> source =
-    v8::String::NewFromUtf8(isolate, scriptSource.c_str(), v8::NewStringType::kNormal).ToLocalChecked();
+
+    v8::Local<v8::String> filename = v8::String::NewFromUtf8(
+      isolate,
+      filePath.make_absolute().str().c_str(),
+      v8::NewStringType::kNormal
+    ).ToLocalChecked();
+
+
+    context->Global()->Set(v8::String::NewFromUtf8(isolate, "__filename__"), filename);
+
+    v8::Local<v8::String> source = v8::String::NewFromUtf8(
+      isolate,
+      scriptSource.c_str(),
+      v8::NewStringType::kNormal
+    ).ToLocalChecked();
     v8::Local<v8::Script> script = v8::Script::Compile(context, source).ToLocalChecked();
     v8::Local<v8::Value> result = script->Run(context).ToLocalChecked();
     v8::String::Utf8Value utf8(isolate, result);
