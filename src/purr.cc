@@ -58,13 +58,18 @@ class ExportsHolder {
 
 ExportsHolder * ExportsHolder::instance = NULL;
 
+std::string ValueToSTDString(v8::Local<v8::Value> value) {
+  v8::Local<v8::String> castedValue = value->ToString();
+  v8::String::Utf8Value utf8Value(castedValue);
+  std::string strValue(*utf8Value);
+
+  return strValue;
+}
+
 void ExportsGetter(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
   v8::Local<v8::Object> module = info.Holder();
 
-  v8::Local<v8::String> filename = module->Get(v8::String::NewFromUtf8(module->GetIsolate(), "__filename__"))->ToString();
-  v8::String::Utf8Value filenameUTF8(filename);
-  std::string fileNameStr(*filenameUTF8);
-
+  std::string fileNameStr = ValueToSTDString(module->Get(v8::String::NewFromUtf8(module->GetIsolate(), "__filename__")));
   v8::Persistent<v8::Value> * exports = ExportsHolder::Instance()->getExports(module->GetIsolate(), fileNameStr);
   info.GetReturnValue().Set(*exports);
 }
@@ -72,13 +77,9 @@ void ExportsGetter(v8::Local<v8::String> property, const v8::PropertyCallbackInf
 void ExportsSetter(v8::Local<v8::String > property, v8::Local<v8::Value > value, const v8::PropertyCallbackInfo<void> &info) {
   v8::Local<v8::Object> module = info.Holder();
 
-  v8::Local<v8::String> filename = module->Get(v8::String::NewFromUtf8(module->GetIsolate(), "__filename__"))->ToString();
-  v8::String::Utf8Value filenameUTF8(filename);
-  std::string fileNameStr(*filenameUTF8);
-
+  std::string fileNameStr = ValueToSTDString(module->Get(v8::String::NewFromUtf8(module->GetIsolate(), "__filename__")));
   ExportsHolder::Instance()->setExports(module->GetIsolate(), fileNameStr, value);
 }
-
 
 void ModuleGetter(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
   v8::Local<v8::Object> module = info.Holder();
