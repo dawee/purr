@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stddef.h>
+#include <map>
 #include <iostream>
 #include <string>
 #include <fstream>
@@ -21,11 +22,10 @@ using namespace std;
 class ExportsHolder {
 
   private:
-    ExportsHolder() {
-      mainExports = NULL;
-    }
+    ExportsHolder() {}
 
-    v8::Persistent<v8::Object> * mainExports;
+    std::map<std::string, v8::Persistent<v8::Object> *> savedExports;
+
     static ExportsHolder * instance;
 
   public:
@@ -37,13 +37,13 @@ class ExportsHolder {
       return instance;
     }
 
-    v8::Persistent<v8::Object> * getMainExports(v8::Isolate * isolate) {
-      if (mainExports == NULL) {
+    v8::Persistent<v8::Object> * getExports(v8::Isolate * isolate, std::string name) {
+      if (savedExports.count(name) == 0) {
         v8::Local<v8::Object> localExports = v8::Object::New(isolate);
-        mainExports = new v8::Persistent<v8::Object>(isolate, localExports);
+        savedExports[name] = new v8::Persistent<v8::Object>(isolate, localExports);
       }
 
-      return mainExports;
+      return savedExports[name];
     }
 
 };
@@ -52,7 +52,12 @@ ExportsHolder * ExportsHolder::instance = NULL;
 
 void ExportsGetter(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
   v8::Local<v8::Object> self = info.Holder();
-  v8::Persistent<v8::Object> *  exports = ExportsHolder::Instance()->getMainExports(self->GetIsolate());
+
+  v8::Local<v8::String> filename = self->Get(v8::String::NewFromUtf8(self->GetIsolate(), "__filename__"))->ToString();
+  v8::String::Utf8Value filenameUTF8(filename);
+  std::string fileNameStr(*filenameUTF8);
+
+  v8::Persistent<v8::Object> * exports = ExportsHolder::Instance()->getExports(self->GetIsolate(), fileNameStr);
   info.GetReturnValue().Set(*exports);
 }
 
