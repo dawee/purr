@@ -1,6 +1,7 @@
 UNAME := $(shell uname)
-
-INCLUDES = -I./deps/include -I./deps/include/v8 -I.
+INCLUDES := -I./deps/include -I./deps/include/v8 -I.
+SOURCES := $(wildcard src/*.cc)
+OBJECTS := $(patsubst src/%.cc,build/%.o,$(SOURCES))
 
 ifeq ($(UNAME), Linux)
 	CXX := g++
@@ -31,20 +32,18 @@ all: dist/purr
 
 re: clean all
 
-dist/purr: build/module.o build/project.o build/purr.o dist
+dist/purr: ${OBJECTS}
+	@mkdir -p dist
+	@echo $@
 	@${CXX} ${V8_OBJECTS} ${SDL2_OBJECTS} build/module.o build/project.o build/purr.o -o $@ ${CXX_FLAGS}
 
-build/%.o: src/%.cc build
+build/%.o: src/%.cc
+	@mkdir -p build
+	@echo $@
 	@${CXX} -c $< -o $@ ${CXX_FLAGS}
 
-build:
-	@mkdir build
-
-dist:
-	@mkdir dist
-
 clean:
-	@rm -rf dist
+	@rm -rf build dist
 
 deps:
 	@make -C deps all
