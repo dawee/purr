@@ -5,14 +5,13 @@
 #include <filesystem/resolver.h>
 
 #include "module.h"
+#include "project.h"
 
 namespace purr {
   Module::Module(
     v8::Isolate * isolate,
-    v8::Local<v8::ObjectTemplate> moduleTemplate,
     std::string filename
-  ) : isolate(isolate), moduleTemplate(moduleTemplate), filename(filename) {
-  }
+  ) : isolate(isolate), filename(filename) {}
 
   void Module::Run() {
     std::ifstream scriptFile;
@@ -30,6 +29,10 @@ namespace purr {
     scriptFile.seekg(0, std::ios::beg);
     scriptSource.assign((std::istreambuf_iterator<char>(scriptFile)), std::istreambuf_iterator<char>());
     scriptFile.close();
+
+    v8::Local<v8::ObjectTemplate> moduleTemplate = v8::ObjectTemplate::New(isolate);
+    moduleTemplate->SetAccessor(v8::String::NewFromUtf8(isolate, "exports"), &Module::ExportsGetter, &Module::ExportsSetter);
+    moduleTemplate->SetAccessor(v8::String::NewFromUtf8(isolate, "module"), &Module::ModuleGetter);
 
     v8::Local<v8::Context> context = v8::Context::New(isolate, NULL, moduleTemplate);
     v8::Context::Scope context_scope(context);
@@ -73,6 +76,20 @@ namespace purr {
     std::string strValue(*utf8Value);
 
     return strValue;
+  }
+
+  void Module::ExportsGetter(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+    v8::Persistent<v8::Value> * exports = Project::Instance()->GetModuleFromRoot(info.Holder())->GetExports();
+    info.GetReturnValue().Set(*exports);
+  }
+
+  void Module::ExportsSetter(v8::Local<v8::String > property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void> &info) {
+    Project::Instance()->GetModuleFromRoot(info.Holder())->SetExports(value);
+  }
+
+  void Module::ModuleGetter(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+    v8::Local<v8::Object> module = info.Holder();
+    info.GetReturnValue().Set(module);
   }
 
 }

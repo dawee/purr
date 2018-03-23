@@ -3,11 +3,7 @@
 namespace purr {
   Project * Project::instance = NULL;
 
-  Project::Project(v8::Isolate * isolate) : isolate(isolate) {
-    moduleTemplate = v8::ObjectTemplate::New(isolate);
-    moduleTemplate->SetAccessor(v8::String::NewFromUtf8(isolate, "exports"), &Project::ExportsGetter, &Project::ExportsSetter);
-    moduleTemplate->SetAccessor(v8::String::NewFromUtf8(isolate, "module"), &Project::ModuleGetter);
-  }
+  Project::Project(v8::Isolate * isolate) : isolate(isolate) {}
 
   Project * Project::Instance() {
     if (instance == NULL) {
@@ -25,25 +21,11 @@ namespace purr {
 
   Module * Project::Require(std::string filename) {
     if (modules.count(filename) == 0) {
-      modules[filename] = new Module(isolate, moduleTemplate, filename);
+      modules[filename] = new Module(isolate, filename);
       modules[filename]->Run();
     }
 
     return modules[filename];
-  }
-
-  void Project::ExportsGetter(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
-    v8::Persistent<v8::Value> * exports = Project::Instance()->GetModuleFromRoot(info.Holder())->GetExports();
-    info.GetReturnValue().Set(*exports);
-  }
-
-  void Project::ExportsSetter(v8::Local<v8::String > property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void> &info) {
-    Project::Instance()->GetModuleFromRoot(info.Holder())->SetExports(value);
-  }
-
-  void Project::ModuleGetter(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
-    v8::Local<v8::Object> module = info.Holder();
-    info.GetReturnValue().Set(module);
   }
 
 }

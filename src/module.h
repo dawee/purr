@@ -15,10 +15,15 @@ namespace purr {
 
     public:
       static std::string GetFilenameFromRoot(v8::Local<v8::Object>);
-      Module(v8::Isolate *, v8::Local<v8::ObjectTemplate>, std::string);
+      static void ExportsGetter(v8::Local<v8::String>, const v8::PropertyCallbackInfo<v8::Value>&);
+      static void ExportsSetter(v8::Local<v8::String>, v8::Local<v8::Value>, const v8::PropertyCallbackInfo<void> &);
+      static void ModuleGetter(v8::Local<v8::String>, const v8::PropertyCallbackInfo<v8::Value>&);
+
       v8::Persistent<v8::Value> * GetExports();
       void SetExports(v8::Local<v8::Value>);
       void Run();
+
+      Module(v8::Isolate *, std::string);
   };
 
 }
