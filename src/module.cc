@@ -97,12 +97,7 @@ namespace purr {
       v8::NewStringType::kNormal
     ).ToLocalChecked();
 
-    v8::Local<v8::Script> script = v8::Script::Compile(context, source).ToLocalChecked();
-
-    v8::Local<v8::Value> result = script->Run(context).ToLocalChecked();
-    v8::String::Utf8Value utf8(isolate, result);
-
-    std::cout << *utf8 << std::endl;
+    v8::Script::Compile(context, source).ToLocalChecked()->Run(context);
   }
 
   v8::Persistent<v8::Value> * Module::GetExports() {
