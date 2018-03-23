@@ -9,5 +9,4 @@ const draw = () => {
 
 module.exports = {draw, update};
 
-
 exports.update;
