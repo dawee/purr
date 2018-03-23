@@ -31,11 +31,11 @@ all: dist/purr
 
 re: clean all
 
-dist/purr: build/module.o build/project.o build/purr.o
+dist/purr: build/module.o build/project.o build/purr.o dist
 	@${CXX} ${V8_OBJECTS} ${SDL2_OBJECTS} build/module.o build/project.o build/purr.o -o $@ ${CXX_FLAGS}
 
 build/%.o: src/%.cc build
-	@${CXX} ${V8_OBJECTS} ${SDL2_OBJECTS} -c $< -o $@ ${CXX_FLAGS}
+	@${CXX} -c $< -o $@ ${CXX_FLAGS}
 
 build:
 	@mkdir build
