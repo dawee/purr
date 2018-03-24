@@ -6,6 +6,6 @@ const draw = () => {
   console.log('draw');
 };
 
-console.log('hello.js loaded');
-
 module.exports = {draw, update};
+
+console.log('hello.js loaded', exports.draw, module.exports.update);

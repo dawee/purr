@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include <SDL2/SDL.h>
 #include <v8/v8.h>
 #include <v8/libplatform/libplatform.h>
@@ -25,6 +27,15 @@ int main(int argc, char * argv[]) {
   if (window == NULL) {
     fprintf(stderr, "could not create window: %s\n", SDL_GetError());
     return 1;
+  }
+
+  SDL_Renderer * renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+
+  if (renderer == NULL){
+  	SDL_DestroyWindow(window);
+  	std::cout << "SDL_CreateRenderer Error: " << SDL_GetError() << std::endl;
+  	SDL_Quit();
+  	return 1;
   }
 
   SDL_SetWindowBordered(window, SDL_TRUE);
@@ -62,6 +73,7 @@ int main(int argc, char * argv[]) {
   v8::V8::Dispose();
   v8::V8::ShutdownPlatform();
   delete create_params.array_buffer_allocator;
+  SDL_DestroyRenderer(renderer);
   SDL_DestroyWindow(window);
   SDL_Quit();
   return 0;
