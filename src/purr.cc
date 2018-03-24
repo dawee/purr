@@ -55,7 +55,7 @@ int main(int argc, char * argv[]) {
   {
     v8::Isolate::Scope isolate_scope(isolate);
     v8::HandleScope handle_scope(isolate);
-    purr::Project::Instance()->SaveModule(filePath.make_absolute().str());
+    purr::Module * main = purr::Project::Instance()->SaveModule(filePath.make_absolute().str());
 
     SDL_Event event;
     bool quit = false;
@@ -67,6 +67,9 @@ int main(int argc, char * argv[]) {
           quit = true;
         }
       }
+
+      main->CallExportedFunction("update");
+      main->CallExportedFunction("draw");
     }
   }
 

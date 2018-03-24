@@ -20,6 +20,7 @@ namespace purr {
       v8::Persistent<v8::Value> * GetExports();
       void SetExports(v8::Local<v8::Value>);
       void Run();
+      void CallExportedFunction(const char *);
 
       Module(v8::Isolate *, std::string);
   };

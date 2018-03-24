@@ -102,6 +102,32 @@ namespace purr {
     v8::Script::Compile(context, source).ToLocalChecked()->Run(context);
   }
 
+  void Module::CallExportedFunction(const char * name) {
+    v8::Context::Scope context_scope(context);
+    v8::Local<v8::Value> localExports = v8::Local<v8::Value>::New(isolate, *exports);
+
+    if (!localExports->IsObject()) {
+      return;
+    }
+
+    v8::Local<v8::Object> exportsObject = localExports->ToObject();
+    v8::Local<v8::String> key = v8::String::NewFromUtf8(isolate, name);
+
+    if (!exportsObject->Has(key)) {
+      return;
+    }
+
+    v8::Local<v8::Value> field = exportsObject->Get(key);
+
+    if (!field->IsFunction()) {
+      return;
+    }
+
+    v8::Local<v8::Function> func = v8::Local<v8::Function>::Cast(field);
+
+    func->Call(func, 0, NULL);
+  }
+
   v8::Persistent<v8::Value> * Module::GetExports() {
     return exports;
   }

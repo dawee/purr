@@ -7,5 +7,3 @@ const draw = () => {
 };
 
 module.exports = {draw, update};
-
-console.log('hello.js loaded', exports.draw, module.exports.update);
