@@ -16,21 +16,22 @@ namespace purr {
     return strValue;
   }
 
-  static void ExportsGetter(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
-    v8::Persistent<v8::Value> * exports = Project::Instance()->GetModuleFromRoot(info.Holder())->GetExports();
-    info.GetReturnValue().Set(*exports);
+  void Module::ExportsGetter(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+    v8::Local<v8::Value> exports = Project::Instance()->GetModuleFromRoot(info.Holder())->GetExports();
+    info.GetReturnValue().Set(exports);
   }
 
-  static void ExportsSetter(v8::Local<v8::String > property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void> &info) {
-    Project::Instance()->GetModuleFromRoot(info.Holder())->SetExports(value);
+  void Module::ExportsSetter(v8::Local<v8::String > property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void> &info) {
+    Module * module = Project::Instance()->GetModuleFromRoot(info.Holder());
+    module->exports.Reset(module->isolate, value);
   }
 
-  static void ModuleGetter(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+  void Module::ModuleGetter(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
     v8::Local<v8::Object> module = info.Holder();
     info.GetReturnValue().Set(module);
   }
 
-  static void ConsoleLog(const v8::FunctionCallbackInfo<v8::Value> &args) {
+  void Module::ConsoleLog(const v8::FunctionCallbackInfo<v8::Value> &args) {
     for (unsigned index = 0; index < args.Length(); ++index) {
       if (index > 0) {
         std::cout << " ";
@@ -42,10 +43,7 @@ namespace purr {
     std::cout << std::endl;
   }
 
-  Module::Module(
-    v8::Isolate * isolate,
-    std::string filename
-  ) : isolate(isolate), filename(filename) {
+  Module::Module(v8::Isolate * isolate, std::string filename) : isolate(isolate), filename(filename) {
     v8::Local<v8::ObjectTemplate> consoleTemplate = v8::ObjectTemplate::New(isolate);
     consoleTemplate->Set(v8::String::NewFromUtf8(isolate, "log"), v8::FunctionTemplate::New(isolate, &ConsoleLog));
 
@@ -63,12 +61,11 @@ namespace purr {
       v8::NewStringType::kNormal
     ).ToLocalChecked();
 
-    v8::Local<v8::Object> initialConsole = consoleTemplate->NewInstance();
-    console = new v8::Persistent<v8::Object>(isolate, initialConsole);
-    v8::Local<v8::Object> localConsole = v8::Local<v8::Object>::New(isolate, *console);
+    v8::Local<v8::Object> localConsole = consoleTemplate->NewInstance();
+    console.Reset(isolate, localConsole);
 
-    v8::Local<v8::Object> initialExports = v8::Object::New(isolate);
-    exports = new v8::Persistent<v8::Value>(isolate, initialExports);
+    v8::Local<v8::Object> localExports = v8::Object::New(isolate);
+    exports.Reset(isolate, localExports);
 
     context->Global()->Set(v8::String::NewFromUtf8(isolate, "__filename__"), filenameUTF8);
     context->Global()->Set(v8::String::NewFromUtf8(isolate, "console"), localConsole);
@@ -104,7 +101,7 @@ namespace purr {
 
   void Module::CallExportedFunction(const char * name) {
     v8::Context::Scope context_scope(context);
-    v8::Local<v8::Value> localExports = v8::Local<v8::Value>::New(isolate, *exports);
+    v8::Local<v8::Value> localExports = v8::Local<v8::Value>::New(isolate, exports);
 
     if (!localExports->IsObject()) {
       return;
@@ -128,12 +125,8 @@ namespace purr {
     func->Call(func, 0, NULL);
   }
 
-  v8::Persistent<v8::Value> * Module::GetExports() {
-    return exports;
-  }
-
-  void Module::SetExports(v8::Local<v8::Value> value) {
-    exports->Reset(isolate, value);
+  v8::Local<v8::Value> Module::GetExports() {
+    return v8::Local<v8::Value>::New(isolate, exports);
   }
 
   std::string Module::GetFilenameFromRoot(v8::Local<v8::Object> root) {
