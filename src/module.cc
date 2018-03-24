@@ -45,7 +45,34 @@ namespace purr {
   Module::Module(
     v8::Isolate * isolate,
     std::string filename
-  ) : isolate(isolate), filename(filename) {}
+  ) : isolate(isolate), filename(filename) {
+    v8::Local<v8::ObjectTemplate> consoleTemplate = v8::ObjectTemplate::New(isolate);
+    consoleTemplate->Set(v8::String::NewFromUtf8(isolate, "log"), v8::FunctionTemplate::New(isolate, &ConsoleLog));
+
+    v8::Local<v8::ObjectTemplate> moduleTemplate = v8::ObjectTemplate::New(isolate);
+
+    moduleTemplate->SetAccessor(v8::String::NewFromUtf8(isolate, "exports"), &ExportsGetter, &ExportsSetter);
+    moduleTemplate->SetAccessor(v8::String::NewFromUtf8(isolate, "module"), &ModuleGetter);
+
+    context = v8::Context::New(isolate, NULL, moduleTemplate);
+    v8::Context::Scope context_scope(context);
+
+    v8::Local<v8::String> filenameUTF8 = v8::String::NewFromUtf8(
+      isolate,
+      filename.c_str(),
+      v8::NewStringType::kNormal
+    ).ToLocalChecked();
+
+    v8::Local<v8::Object> initialConsole = consoleTemplate->NewInstance();
+    console = new v8::Persistent<v8::Object>(isolate, initialConsole);
+    v8::Local<v8::Object> localConsole = v8::Local<v8::Object>::New(isolate, *console);
+
+    v8::Local<v8::Object> initialExports = v8::Object::New(isolate);
+    exports = new v8::Persistent<v8::Value>(isolate, initialExports);
+
+    context->Global()->Set(v8::String::NewFromUtf8(isolate, "__filename__"), filenameUTF8);
+    context->Global()->Set(v8::String::NewFromUtf8(isolate, "console"), localConsole);
+  }
 
   void Module::Run() {
     std::ifstream scriptFile;
@@ -64,32 +91,7 @@ namespace purr {
     scriptSource.assign((std::istreambuf_iterator<char>(scriptFile)), std::istreambuf_iterator<char>());
     scriptFile.close();
 
-    v8::Local<v8::ObjectTemplate> consoleTemplate = v8::ObjectTemplate::New(isolate);
-    consoleTemplate->Set(v8::String::NewFromUtf8(isolate, "log"), v8::FunctionTemplate::New(isolate, &ConsoleLog));
-
-    v8::Local<v8::ObjectTemplate> moduleTemplate = v8::ObjectTemplate::New(isolate);
-
-    moduleTemplate->SetAccessor(v8::String::NewFromUtf8(isolate, "exports"), &ExportsGetter, &ExportsSetter);
-    moduleTemplate->SetAccessor(v8::String::NewFromUtf8(isolate, "module"), &ModuleGetter);
-
-    v8::Local<v8::Context> context = v8::Context::New(isolate, NULL, moduleTemplate);
     v8::Context::Scope context_scope(context);
-
-    v8::Local<v8::Object> initialConsole = consoleTemplate->NewInstance();
-    console = new v8::Persistent<v8::Object>(isolate, initialConsole);
-    v8::Local<v8::Object> localConsole = v8::Local<v8::Object>::New(isolate, *console);
-
-    v8::Local<v8::Object> initialExports = v8::Object::New(isolate);
-    exports = new v8::Persistent<v8::Value>(isolate, initialExports);
-
-    v8::Local<v8::String> filenameUTF8 = v8::String::NewFromUtf8(
-      isolate,
-      filename.c_str(),
-      v8::NewStringType::kNormal
-    ).ToLocalChecked();
-
-    context->Global()->Set(v8::String::NewFromUtf8(isolate, "__filename__"), filenameUTF8);
-    context->Global()->Set(v8::String::NewFromUtf8(isolate, "console"), localConsole);
 
     v8::Local<v8::String> source = v8::String::NewFromUtf8(
       isolate,

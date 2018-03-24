@@ -38,14 +38,13 @@ int main(int argc, char * argv[]) {
   v8::V8::InitializePlatform(platform);
   v8::V8::Initialize();
   v8::Isolate::CreateParams create_params;
-  create_params.array_buffer_allocator =
-  v8::ArrayBuffer::Allocator::NewDefaultAllocator();
+  create_params.array_buffer_allocator = v8::ArrayBuffer::Allocator::NewDefaultAllocator();
 
   v8::Isolate* isolate = v8::Isolate::New(create_params);
   {
     v8::Isolate::Scope isolate_scope(isolate);
     v8::HandleScope handle_scope(isolate);
-    purr::Project::Instance()->Require(filePath.make_absolute().str());
+    purr::Project::Instance()->SaveModule(filePath.make_absolute().str());
 
     SDL_Event event;
     bool quit = false;

@@ -19,7 +19,7 @@ namespace purr {
     return modules[filename];
   }
 
-  Module * Project::Require(std::string filename) {
+  Module * Project::SaveModule(std::string filename) {
     if (modules.count(filename) == 0) {
       modules[filename] = new Module(isolate, filename);
       modules[filename]->Run();

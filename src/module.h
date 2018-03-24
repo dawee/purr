@@ -12,6 +12,7 @@ namespace purr {
       v8::Isolate * isolate;
       v8::Persistent<v8::Value> * exports;
       v8::Persistent<v8::Object> * console;
+      v8::Local<v8::Context> context;
 
     public:
       static std::string GetFilenameFromRoot(v8::Local<v8::Object>);

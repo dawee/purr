@@ -20,7 +20,7 @@ namespace purr {
       static Project * Instance();
 
       Module * GetModuleFromRoot(v8::Local<v8::Object>);
-      Module * Require(std::string);
+      Module * SaveModule(std::string);
   };
 
 }
