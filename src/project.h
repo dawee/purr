@@ -3,6 +3,7 @@
 
 #include <map>
 #include <v8/v8.h>
+#include "api.h"
 #include "console.h"
 #include "module.h"
 
@@ -13,6 +14,7 @@ namespace purr {
       static Project * instance;
 
       v8::Isolate * isolate;
+      API * api;
       Console * console;
       std::map<std::string, Module *> modules;
 

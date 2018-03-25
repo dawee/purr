@@ -4,6 +4,7 @@ namespace purr {
   Project * Project::instance = NULL;
 
   Project::Project(v8::Isolate * isolate) : isolate(isolate) {
+    api = new API(isolate);
     console = new Console(isolate);
   }
 
@@ -33,6 +34,7 @@ namespace purr {
   void Project::FeedContextAPI(v8::Local<v8::Context> context) {
     v8::Local<v8::Object> object = context->Global();
 
+    api->FeedObject("purr", object);
     console->FeedObject("console", object);
   }
 
