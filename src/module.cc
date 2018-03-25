@@ -6,16 +6,9 @@
 
 #include "module.h"
 #include "project.h"
+#include "util.h"
 
 namespace purr {
-  static std::string ValueToSTDString(v8::Local<v8::Value> value) {
-    v8::Local<v8::String> castedValue = value->ToString();
-    v8::String::Utf8Value utf8Value(castedValue);
-    std::string strValue(*utf8Value);
-
-    return strValue;
-  }
-
   void Module::ExportsGetter(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
     v8::Local<v8::Value> exports = Project::Instance()->GetModuleFromRoot(info.Holder())->GetExports();
     info.GetReturnValue().Set(exports);
@@ -31,22 +24,7 @@ namespace purr {
     info.GetReturnValue().Set(module);
   }
 
-  void Module::ConsoleLog(const v8::FunctionCallbackInfo<v8::Value> &args) {
-    for (unsigned index = 0; index < args.Length(); ++index) {
-      if (index > 0) {
-        std::cout << " ";
-      }
-
-      std::cout << ValueToSTDString(args[index]);
-    }
-
-    std::cout << std::endl;
-  }
-
   Module::Module(v8::Isolate * isolate, std::string filename) : isolate(isolate), filename(filename) {
-    v8::Local<v8::ObjectTemplate> consoleTemplate = v8::ObjectTemplate::New(isolate);
-    consoleTemplate->Set(v8::String::NewFromUtf8(isolate, "log"), v8::FunctionTemplate::New(isolate, &ConsoleLog));
-
     v8::Local<v8::ObjectTemplate> moduleTemplate = v8::ObjectTemplate::New(isolate);
 
     moduleTemplate->SetAccessor(v8::String::NewFromUtf8(isolate, "exports"), &ExportsGetter, &ExportsSetter);
@@ -61,14 +39,11 @@ namespace purr {
       v8::NewStringType::kNormal
     ).ToLocalChecked();
 
-    v8::Local<v8::Object> localConsole = consoleTemplate->NewInstance();
-    console.Reset(isolate, localConsole);
-
     v8::Local<v8::Object> localExports = v8::Object::New(isolate);
     exports.Reset(isolate, localExports);
 
     context->Global()->Set(v8::String::NewFromUtf8(isolate, "__filename__"), filenameUTF8);
-    context->Global()->Set(v8::String::NewFromUtf8(isolate, "console"), localConsole);
+    Project::Instance()->FeedContextAPI(context);
   }
 
   void Module::Run() {

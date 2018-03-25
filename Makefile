@@ -35,7 +35,7 @@ re: clean all
 dist/purr: ${OBJECTS}
 	@mkdir -p dist
 	@echo $@
-	@${CXX} ${V8_OBJECTS} ${SDL2_OBJECTS} build/module.o build/project.o build/purr.o -o $@ ${CXX_FLAGS}
+	@${CXX} ${V8_OBJECTS} ${SDL2_OBJECTS} ${OBJECTS} -o $@ ${CXX_FLAGS}
 
 build/%.o: src/%.cc
 	@mkdir -p build

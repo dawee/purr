@@ -3,7 +3,9 @@
 namespace purr {
   Project * Project::instance = NULL;
 
-  Project::Project(v8::Isolate * isolate) : isolate(isolate) {}
+  Project::Project(v8::Isolate * isolate) : isolate(isolate) {
+    console = new Console(isolate);
+  }
 
   Project * Project::Instance() {
     if (instance == NULL) {
@@ -26,6 +28,12 @@ namespace purr {
     }
 
     return modules[filename];
+  }
+
+  void Project::FeedContextAPI(v8::Local<v8::Context> context) {
+    v8::Local<v8::Object> object = context->Global();
+
+    console->FeedObject("console", object);
   }
 
 }

@@ -14,14 +14,14 @@ namespace purr {
       v8::Persistent<v8::Object> console;
       v8::Local<v8::Context> context;
 
+      v8::Local<v8::Value> GetExports();
+
     public:
       static std::string GetFilenameFromRoot(v8::Local<v8::Object>);
       static void ExportsGetter(v8::Local<v8::String>, const v8::PropertyCallbackInfo<v8::Value>&);
       static void ExportsSetter(v8::Local<v8::String>, v8::Local<v8::Value>, const v8::PropertyCallbackInfo<void>&);
       static void ModuleGetter(v8::Local<v8::String>, const v8::PropertyCallbackInfo<v8::Value>&);
-      static void ConsoleLog(const v8::FunctionCallbackInfo<v8::Value>&);
 
-      v8::Local<v8::Value> GetExports();
       void Run();
       void CallExportedFunction(const char *);
 
