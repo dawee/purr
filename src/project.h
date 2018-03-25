@@ -2,6 +2,7 @@
 #define PURR_PROJECT_H
 
 #include <map>
+#include <SDL2/SDL.h>
 #include <v8/v8.h>
 #include "api.h"
 #include "console.h"

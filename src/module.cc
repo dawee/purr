@@ -33,16 +33,14 @@ namespace purr {
     context = v8::Context::New(isolate, NULL, moduleTemplate);
     v8::Context::Scope context_scope(context);
 
-    v8::Local<v8::String> filenameUTF8 = v8::String::NewFromUtf8(
-      isolate,
-      filename.c_str(),
-      v8::NewStringType::kNormal
-    ).ToLocalChecked();
-
+    v8::Local<v8::String> filenameUTF8 = v8::String::NewFromUtf8(isolate, filename.c_str());
+    v8::Local<v8::String> dirnameUTF8 = v8::String::NewFromUtf8(isolate,GetDir().c_str());
     v8::Local<v8::Object> localExports = v8::Object::New(isolate);
-    exports.Reset(isolate, localExports);
 
+    exports.Reset(isolate, localExports);
     context->Global()->Set(v8::String::NewFromUtf8(isolate, "__filename__"), filenameUTF8);
+    context->Global()->Set(v8::String::NewFromUtf8(isolate, "__dirname__"), dirnameUTF8);
+
     Project::Instance()->FeedContextAPI(context);
   }
 
@@ -110,4 +108,15 @@ namespace purr {
     return ValueToSTDString(filename);
   }
 
+  std::string Module::GetDir() {
+    filesystem::path filePath(filename);
+    return filePath.parent_path().str();
+  }
+
+  std::string Module::ResolveRelativePath(const char * relativePathStr) {
+    filesystem::path dirPath(GetDir());
+    filesystem::path relativePath(relativePathStr);
+
+    return (dirPath / relativePath).make_absolute().str();
+  }
 }

@@ -6,7 +6,11 @@
 
 namespace purr {
   void API::LoadTexture(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    std::cout << "load texture" << std::endl;
+    if (args.Length() == 0) {
+      return;
+    }
+
+
   }
 
   API::API(v8::Isolate* isolate) : Feeder::Feeder(isolate) {

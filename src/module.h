@@ -15,6 +15,7 @@ namespace purr {
       v8::Local<v8::Context> context;
 
       v8::Local<v8::Value> GetExports();
+      std::string GetDir();
 
     public:
       static std::string GetFilenameFromRoot(v8::Local<v8::Object>);
@@ -24,6 +25,7 @@ namespace purr {
 
       void Run();
       void CallExportedFunction(const char *);
+      std::string ResolveRelativePath(const char *);
 
       Module(v8::Isolate *, std::string);
   };
