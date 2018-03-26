@@ -94,7 +94,6 @@ int main(int argc, char * argv[]) {
       main->CallExportedFunction("draw");
       SDL_RenderCopy(renderer, texture, NULL, NULL);
       SDL_RenderPresent(renderer);
-      SDL_Delay(16);
     }
   }
 
