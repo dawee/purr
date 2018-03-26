@@ -5,6 +5,10 @@
 #include "feeder.h"
 
 namespace purr {
+  enum ObjectType {
+    TEXTURE
+  };
+
   class API : public Feeder {
     public:
       static void LoadTexture(const v8::FunctionCallbackInfo<v8::Value>&);

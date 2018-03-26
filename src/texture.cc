@@ -18,10 +18,9 @@ namespace purr {
   }
 
   void Texture::Load() {
-    if (loadingThread != nullptr) {
+    if (loadingThread != nullptr || sdlTexure != nullptr) {
       return;
     }
-
 
     loadingThread = SDL_CreateThread(
       Texture::LoadTexture,
