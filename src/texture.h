@@ -22,7 +22,7 @@ namespace purr {
 
       void Load();
       bool IsLoaded();
-      void Draw(SDLDisplay *);
+      void Draw(SDLDisplay *, int, int);
 
       Texture(std::string);
   };

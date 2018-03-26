@@ -47,9 +47,9 @@ namespace purr {
     return sdlTexture != nullptr;
   }
 
-  void Texture::Draw(SDLDisplay * display) {
+  void Texture::Draw(SDLDisplay * display, int x, int y) {
     if (IsLoaded()) {
-      display->DrawSDLTexture(sdlTexture, width, height);
+      display->DrawSDLTexture(sdlTexture, x, y, width, height);
     }
   }
 

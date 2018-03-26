@@ -63,7 +63,10 @@ namespace purr {
       return;
     }
 
-    texture->Draw(Project::Instance()->Display());
+    int x = info.Length() > 1 ? info[1]->Int32Value() : 0;
+    int y = info.Length() > 2 ? info[2]->Int32Value() : 0;
+
+    texture->Draw(Project::Instance()->Display(), x, y);
   }
 
   API::API(v8::Isolate* isolate) : Feeder::Feeder(isolate) {

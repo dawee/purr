@@ -1,5 +1,11 @@
 const mallow = purr.loadTexture(`${__dirname__}/asset/mallow.bmp`);
 
-const draw = () => purr.drawTexture(mallow);
+let x = 0;
 
-module.exports = {draw};
+const update = () => {
+  x += 0.05;
+}
+
+const draw = () => purr.drawTexture(mallow, x, 0);
+
+module.exports = {draw, update};
