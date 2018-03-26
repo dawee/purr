@@ -18,7 +18,7 @@ namespace purr {
       v8::Isolate * isolate;
       API * api;
       Console * console;
-      Display * display;
+      SDLDisplay * display;
       std::map<std::string, Module *> modules;
 
       Project(v8::Isolate *);
@@ -33,9 +33,8 @@ namespace purr {
 
       Module * GetModuleFromRoot(v8::Local<v8::Object>);
       Module * SaveModule(std::string);
+      SDLDisplay * Display();
       void FeedContextAPI(v8::Local<v8::Context>);
-      void Draw();
-      void HideDisplay();
   };
 
 }

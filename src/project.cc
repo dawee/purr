@@ -6,7 +6,7 @@ namespace purr {
   Project::Project(v8::Isolate * isolate) : isolate(isolate) {
     api = new API(isolate);
     console = new Console(isolate);
-    display = new Display();
+    display = new SDLDisplay();
   }
 
   Project::~Project() {
@@ -20,7 +20,9 @@ namespace purr {
   }
 
   Project * Project::CreateInstance() {
-    instance = new Project(v8::Isolate::GetCurrent());
+    if (instance == nullptr) {
+      instance = new Project(v8::Isolate::GetCurrent());
+    }
 
     return instance;
   }
@@ -47,15 +49,11 @@ namespace purr {
     console->FeedObject("console", object);
   }
 
-  void Project::Draw() {
-    display->Draw();
+  SDLDisplay * Project::Display() {
+    return display;
   }
 
   void Project::DeleteInstance() {
     delete instance;
-  }
-
-  void Project::HideDisplay() {
-    display->Hide();
   }
 }

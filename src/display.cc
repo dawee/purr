@@ -6,7 +6,7 @@
 #define SCREEN_HEIGHT 600
 
 namespace purr {
-  Display::Display() {
+  SDLDisplay::SDLDisplay() {
     window = SDL_CreateWindow(
       "Purr",
       SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
@@ -44,20 +44,42 @@ namespace purr {
     SDL_SetWindowBordered(window, SDL_TRUE);
   }
 
-  Display::~Display() {
+  SDL_Texture * SDLDisplay::CreateSDLTextureFromImage(std::string filename) {
+    SDL_Surface * surface = SDL_LoadBMP(filename.c_str());
+
+    if (surface == nullptr) {
+    	std::cout << "SDL_LoadBMP Error: " << SDL_GetError() << std::endl;
+    	return nullptr;
+    }
+
+    SDL_Texture * sdlTexture = SDL_CreateTextureFromSurface(renderer, surface);
+    SDL_FreeSurface(surface);
+
+    if (sdlTexture == nullptr){
+    	std::cout << "SDL_CreateTextureFromSurface Error: " << SDL_GetError() << std::endl;
+    	return nullptr;
+    }
+
+    return sdlTexture;
+  }
+
+  SDLDisplay::~SDLDisplay() {
     SDL_DestroyTexture(background);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
   }
 
-  void Display::Draw() {
-    SDL_RenderClear(renderer);
-    SDL_RenderCopy(renderer, background, NULL, NULL);
+  void SDLDisplay::Render() {
     SDL_RenderPresent(renderer);
   }
 
-  void Display::Hide() {
+  void SDLDisplay::Clear() {
+    SDL_RenderClear(renderer);
+    SDL_RenderCopy(renderer, background, NULL, NULL);
+  }
+
+  void SDLDisplay::Hide() {
     SDL_HideWindow(window);
   }
 }

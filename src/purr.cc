@@ -36,14 +36,15 @@ int main(int argc, char * argv[]) {
     while (!quit) {
       while (SDL_PollEvent(&event) != 0) {
         if (event.type == SDL_QUIT || (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE)) {
-          project->HideDisplay();
+          project->Display()->Hide();
           quit = true;
         }
       }
 
       main->CallExportedFunction("update");
-      project->Draw();
+      project->Display()->Clear();
       main->CallExportedFunction("draw");
+      project->Display()->Render();
     }
   }
 

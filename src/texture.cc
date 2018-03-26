@@ -1,42 +1,36 @@
 #include <iostream>
 
+#include "project.h"
 #include "texture.h"
 
 namespace purr {
   int Texture::LoadTexture(void * texturePtr) {
     Texture * texture = static_cast<Texture *>(texturePtr);
-    SDL_Surface * bmp = SDL_LoadBMP(texture->filename.c_str());
+    SDLDisplay * display = Project::Instance()->Display();
 
-    if (bmp == nullptr) {
-    	std::cout << "SDL_LoadBMP Error: " << SDL_GetError() << std::endl;
-    	return 1;
-    }
-
-    //SDL_Texture * sdlTexure = SDL_CreateTextureFromSurface(ren, bmp);
-    SDL_FreeSurface(bmp);
-
-    // if (sdlTexure == nullptr){
-    // 	std::cout << "SDL_CreateTextureFromSurface Error: " << SDL_GetError() << std::endl;
-    // 	return 1;
-    // }
-
+    texture->sdlTexure = display->CreateSDLTextureFromImage(texture->filename);
     return 0;
   }
 
   Texture::Texture(std::string filename) : filename(filename) {
-    sdlTexure = NULL;
-    loadingThread = NULL;
+    sdlTexure = nullptr;
+    loadingThread = nullptr;
   }
 
   void Texture::Load() {
-    if (loadingThread == NULL) {
+    if (loadingThread != nullptr) {
       return;
     }
+
 
     loadingThread = SDL_CreateThread(
       Texture::LoadTexture,
       filename.c_str(),
       static_cast<void *>(this)
     );
+
+    if (loadingThread == nullptr) {
+      std::cerr << "SDL_CreateThread Error :" << SDL_GetError() << std::endl;
+    }
   }
 }

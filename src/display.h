@@ -4,18 +4,21 @@
 #include <SDL2/SDL.h>
 
 namespace purr {
-  class Display {
+  class SDLDisplay {
     private:
       SDL_Window * window;
       SDL_Renderer * renderer;
       SDL_Texture * background;
 
     public:
-      void Draw();
+      void Clear();
       void Hide();
+      void Render();
 
-      Display();
-      ~Display();
+      SDL_Texture * CreateSDLTextureFromImage(std::string);
+
+      SDLDisplay();
+      ~SDLDisplay();
   };
 }
 
