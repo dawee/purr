@@ -5,12 +5,24 @@ OBJECTS := $(patsubst src/%.cc,build/%.o,$(SOURCES))
 
 ifeq ($(UNAME), Linux)
 	CXX := g++
-	CXX_FLAGS := ${INCLUDES} --std=c++11 -pthread -ldl
+	CXX_FLAGS := ${INCLUDES} --std=c++11 -pthread
+	LDFLAGS := -ldl
 endif
 
 ifeq ($(UNAME), Darwin)
 	CXX := clang++
-	CXX_FLAGS := ${INCLUDES} --std=c++11 -pthread -liconv -lobjc -framework OpenGL -framework ForceFeedback -lobjc -framework Cocoa -framework Carbon -framework IOKit -framework CoreAudio -framework CoreVideo -framework Metal -framework AudioToolbox -framework AudioUnit
+	CXX_FLAGS := ${INCLUDES} --std=c++11
+	LDFLAGS :=  -liconv -lobjc \
+		-framework OpenGL \
+		-framework ForceFeedback \
+		-framework Cocoa \
+		-framework Carbon \
+		-framework IOKit \
+		-framework CoreAudio \
+		-framework CoreVideo \
+		-framework Metal \
+		-framework AudioToolbox \
+		-framework AudioUnit
 endif
 
 V8_OBJECTS = \
@@ -35,7 +47,7 @@ re: clean all
 dist/purr: ${OBJECTS}
 	@mkdir -p dist
 	@echo $@
-	@${CXX} ${V8_OBJECTS} ${SDL2_OBJECTS} ${OBJECTS} -o $@ ${CXX_FLAGS}
+	@${CXX} ${V8_OBJECTS} ${SDL2_OBJECTS} ${OBJECTS} -o $@ ${CXX_FLAGS} ${LDFLAGS}
 
 build/%.o: src/%.cc
 	@mkdir -p build

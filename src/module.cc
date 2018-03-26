@@ -69,7 +69,7 @@ namespace purr {
       v8::NewStringType::kNormal
     ).ToLocalChecked();
 
-    v8::Script::Compile(context, source).ToLocalChecked()->Run(context);
+    v8::Script::Compile(context, source).ToLocalChecked()->Run(context).ToLocalChecked();
   }
 
   void Module::CallExportedFunction(const char * name) {
