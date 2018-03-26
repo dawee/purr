@@ -8,60 +8,12 @@
 
 #include "project.h"
 
-#define SCREEN_WIDTH 800
-#define SCREEN_HEIGHT 600
-
 int main(int argc, char * argv[]) {
   if (argc != 2) {
     printf("usage:\n\tpurr <filename>\n");
     return 1;
   }
 
-  SDL_Window* window = SDL_CreateWindow(
-    "Purr",
-    SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-    SCREEN_WIDTH, SCREEN_HEIGHT,
-    SDL_WINDOW_SHOWN
-  );
-
-  if (window == nullptr) {
-    std::cerr << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
-    return 1;
-  }
-
-  SDL_Renderer * renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-
-  if (renderer == nullptr){
-    SDL_DestroyWindow(window);
-    std::cerr << "SDL_CreateRenderer Error: " << SDL_GetError() << std::endl;
-    SDL_Quit();
-    return 1;
-  }
-
-  SDL_Surface * surface = SDL_CreateRGBSurface(0, SCREEN_WIDTH, SCREEN_HEIGHT, 32, 0, 0, 0, 0);
-
-  if (surface == nullptr){
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
-    std::cerr << "SDL_GetWindowSurface Error: " << SDL_GetError() << std::endl;
-    SDL_Quit();
-    return 1;
-  }
-
-  SDL_FillRect(surface, NULL, SDL_MapRGB(surface->format, 0, 0, 0));
-  SDL_Texture * texture = SDL_CreateTextureFromSurface(renderer, surface);
-  SDL_FreeSurface(surface);
-
-  if (texture == nullptr){
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
-    std::cerr << "SDL_CreateTextureFromSurface Error: " << SDL_GetError() << std::endl;
-    SDL_Quit();
-    return 1;
-  }
-
-  SDL_SetWindowBordered(window, SDL_TRUE);
-  SDL_UpdateWindowSurface(window);
 
   filesystem::path filePath(argv[1]);
 
@@ -75,7 +27,8 @@ int main(int argc, char * argv[]) {
   {
     v8::Isolate::Scope isolate_scope(isolate);
     v8::HandleScope handle_scope(isolate);
-    purr::Module * main = purr::Project::Instance()->SaveModule(filePath.make_absolute().str());
+    purr::Project * project = purr::Project::CreateInstance();
+    purr::Module * main = project->SaveModule(filePath.make_absolute().str());
 
     SDL_Event event;
     bool quit = false;
@@ -83,26 +36,18 @@ int main(int argc, char * argv[]) {
     while (!quit) {
       while (SDL_PollEvent(&event) != 0) {
         if (event.type == SDL_QUIT || (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE)) {
-          SDL_HideWindow(window);
+          project->HideDisplay();
           quit = true;
         }
       }
 
       main->CallExportedFunction("update");
-
-      SDL_RenderClear(renderer);
+      project->Draw();
       main->CallExportedFunction("draw");
-      SDL_RenderCopy(renderer, texture, NULL, NULL);
-      SDL_RenderPresent(renderer);
     }
   }
 
-  v8::V8::Dispose();
-  v8::V8::ShutdownPlatform();
   delete create_params.array_buffer_allocator;
-  SDL_DestroyTexture(texture);
-  SDL_DestroyRenderer(renderer);
-  SDL_DestroyWindow(window);
-  SDL_Quit();
+  purr::Project::DeleteInstance();
   return 0;
 }

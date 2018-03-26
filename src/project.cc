@@ -6,12 +6,21 @@ namespace purr {
   Project::Project(v8::Isolate * isolate) : isolate(isolate) {
     api = new API(isolate);
     console = new Console(isolate);
+    display = new Display();
+  }
+
+  Project::~Project() {
+    delete api;
+    delete console;
+    delete display;
   }
 
   Project * Project::Instance() {
-    if (instance == NULL) {
-      instance = new Project(v8::Isolate::GetCurrent());
-    }
+    return instance;
+  }
+
+  Project * Project::CreateInstance() {
+    instance = new Project(v8::Isolate::GetCurrent());
 
     return instance;
   }
@@ -38,4 +47,15 @@ namespace purr {
     console->FeedObject("console", object);
   }
 
+  void Project::Draw() {
+    display->Draw();
+  }
+
+  void Project::DeleteInstance() {
+    delete instance;
+  }
+
+  void Project::HideDisplay() {
+    display->Hide();
+  }
 }

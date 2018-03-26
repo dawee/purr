@@ -5,6 +5,7 @@
 #include <SDL2/SDL.h>
 #include <v8/v8.h>
 #include "api.h"
+#include "display.h"
 #include "console.h"
 #include "module.h"
 
@@ -17,16 +18,24 @@ namespace purr {
       v8::Isolate * isolate;
       API * api;
       Console * console;
+      Display * display;
       std::map<std::string, Module *> modules;
 
       Project(v8::Isolate *);
 
+    protected:
+      ~Project();
+
     public:
       static Project * Instance();
+      static Project * CreateInstance();
+      static void DeleteInstance();
 
       Module * GetModuleFromRoot(v8::Local<v8::Object>);
       Module * SaveModule(std::string);
       void FeedContextAPI(v8::Local<v8::Context>);
+      void Draw();
+      void HideDisplay();
   };
 
 }
