@@ -20,22 +20,23 @@ namespace purr {
       Console * console;
       SDLDisplay * display;
       std::map<std::string, Module *> modules;
+      std::string mainFilename;
 
-      Game(v8::Isolate *);
+      Game(v8::Isolate *, std::string);
 
     protected:
       ~Game();
 
     public:
       static Game * Instance();
-      static Game * CreateInstance();
+      static Game * CreateInstance(v8::Isolate *, std::string mainFilename);
       static void DeleteInstance();
 
       Module * GetModuleFromRoot(v8::Local<v8::Object>);
       Module * SaveModule(std::string);
       SDLDisplay * Display();
       void FeedContextAPI(v8::Local<v8::Context>);
-      void RunLoop(std::string);
+      void RunLoop();
   };
 
 }

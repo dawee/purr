@@ -26,7 +26,7 @@ int main(int argc, char * argv[]) {
   {
     v8::Isolate::Scope isolate_scope(isolate);
     v8::HandleScope handle_scope(isolate);
-    purr::Game::CreateInstance()->RunLoop(filePath.make_absolute().str());
+    purr::Game::CreateInstance(isolate, filePath.make_absolute().str())->RunLoop();
   }
 
   delete create_params.array_buffer_allocator;

@@ -3,7 +3,7 @@
 namespace purr {
   Game * Game::instance = NULL;
 
-  Game::Game(v8::Isolate * isolate) : isolate(isolate) {
+  Game::Game(v8::Isolate * isolate, std::string mainFilename) : isolate(isolate), mainFilename(mainFilename) {
     api = new API(isolate);
     console = new Console(isolate);
     display = new SDLDisplay();
@@ -19,9 +19,9 @@ namespace purr {
     return instance;
   }
 
-  Game * Game::CreateInstance() {
+  Game * Game::CreateInstance(v8::Isolate * isolate, std::string mainFilename) {
     if (instance == nullptr) {
-      instance = new Game(v8::Isolate::GetCurrent());
+      instance = new Game(isolate, mainFilename);
     }
 
     return instance;
@@ -57,8 +57,8 @@ namespace purr {
     delete instance;
   }
 
-  void Game::RunLoop(std::string mainPath) {
-    purr::Module * main = SaveModule(mainPath);
+  void Game::RunLoop() {
+    purr::Module * main = SaveModule(mainFilename);
     SDL_Event event;
     bool quit = false;
 
