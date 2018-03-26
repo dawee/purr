@@ -1,12 +1,12 @@
 #include <iostream>
 
-#include "project.h"
+#include "game.h"
 #include "texture.h"
 
 namespace purr {
   int Texture::LoadTexture(void * texturePtr) {
     Texture * texture = static_cast<Texture *>(texturePtr);
-    SDLDisplay * display = Project::Instance()->Display();
+    SDLDisplay * display = Game::Instance()->Display();
 
     SDL_Texture * sdlTexture = display->CreateSDLTextureFromImage(texture->filename);
     SDL_QueryTexture(

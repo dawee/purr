@@ -1,5 +1,5 @@
-#ifndef PURR_PROJECT_H
-#define PURR_PROJECT_H
+#ifndef PURR_GAME_H
+#define PURR_GAME_H
 
 #include <map>
 #include <SDL2/SDL.h>
@@ -11,9 +11,9 @@
 
 namespace purr {
 
-  class Project {
+  class Game {
     private:
-      static Project * instance;
+      static Game * instance;
 
       v8::Isolate * isolate;
       API * api;
@@ -21,14 +21,14 @@ namespace purr {
       SDLDisplay * display;
       std::map<std::string, Module *> modules;
 
-      Project(v8::Isolate *);
+      Game(v8::Isolate *);
 
     protected:
-      ~Project();
+      ~Game();
 
     public:
-      static Project * Instance();
-      static Project * CreateInstance();
+      static Game * Instance();
+      static Game * CreateInstance();
       static void DeleteInstance();
 
       Module * GetModuleFromRoot(v8::Local<v8::Object>);

@@ -5,17 +5,17 @@
 #include <filesystem/resolver.h>
 
 #include "module.h"
-#include "project.h"
+#include "game.h"
 #include "util.h"
 
 namespace purr {
   void Module::ExportsGetter(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
-    v8::Local<v8::Value> exports = Project::Instance()->GetModuleFromRoot(info.Holder())->GetExports();
+    v8::Local<v8::Value> exports = Game::Instance()->GetModuleFromRoot(info.Holder())->GetExports();
     info.GetReturnValue().Set(exports);
   }
 
   void Module::ExportsSetter(v8::Local<v8::String > property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void> &info) {
-    Module * module = Project::Instance()->GetModuleFromRoot(info.Holder());
+    Module * module = Game::Instance()->GetModuleFromRoot(info.Holder());
     module->exports.Reset(module->isolate, value);
   }
 
@@ -41,7 +41,7 @@ namespace purr {
     context->Global()->Set(v8::String::NewFromUtf8(isolate, "__filename__"), filenameUTF8);
     context->Global()->Set(v8::String::NewFromUtf8(isolate, "__dirname__"), dirnameUTF8);
 
-    Project::Instance()->FeedContextAPI(context);
+    Game::Instance()->FeedContextAPI(context);
   }
 
   void Module::Run() {

@@ -1,39 +1,39 @@
-#include "project.h"
+#include "game.h"
 
 namespace purr {
-  Project * Project::instance = NULL;
+  Game * Game::instance = NULL;
 
-  Project::Project(v8::Isolate * isolate) : isolate(isolate) {
+  Game::Game(v8::Isolate * isolate) : isolate(isolate) {
     api = new API(isolate);
     console = new Console(isolate);
     display = new SDLDisplay();
   }
 
-  Project::~Project() {
+  Game::~Game() {
     delete api;
     delete console;
     delete display;
   }
 
-  Project * Project::Instance() {
+  Game * Game::Instance() {
     return instance;
   }
 
-  Project * Project::CreateInstance() {
+  Game * Game::CreateInstance() {
     if (instance == nullptr) {
-      instance = new Project(v8::Isolate::GetCurrent());
+      instance = new Game(v8::Isolate::GetCurrent());
     }
 
     return instance;
   }
 
-  Module * Project::GetModuleFromRoot(v8::Local<v8::Object> root) {
+  Module * Game::GetModuleFromRoot(v8::Local<v8::Object> root) {
     std::string filename = Module::GetFilenameFromRoot(root);
 
     return modules[filename];
   }
 
-  Module * Project::SaveModule(std::string filename) {
+  Module * Game::SaveModule(std::string filename) {
     if (modules.count(filename) == 0) {
       modules[filename] = new Module(isolate, filename);
       modules[filename]->Run();
@@ -42,22 +42,22 @@ namespace purr {
     return modules[filename];
   }
 
-  void Project::FeedContextAPI(v8::Local<v8::Context> context) {
+  void Game::FeedContextAPI(v8::Local<v8::Context> context) {
     v8::Local<v8::Object> object = context->Global();
 
     api->FeedObject("purr", object);
     console->FeedObject("console", object);
   }
 
-  SDLDisplay * Project::Display() {
+  SDLDisplay * Game::Display() {
     return display;
   }
 
-  void Project::DeleteInstance() {
+  void Game::DeleteInstance() {
     delete instance;
   }
 
-  void Project::RunLoop(std::string mainPath) {
+  void Game::RunLoop(std::string mainPath) {
     purr::Module * main = SaveModule(mainPath);
     SDL_Event event;
     bool quit = false;

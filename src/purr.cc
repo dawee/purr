@@ -6,7 +6,7 @@
 #include <filesystem/path.h>
 #include <filesystem/resolver.h>
 
-#include "project.h"
+#include "game.h"
 
 int main(int argc, char * argv[]) {
   if (argc != 2) {
@@ -26,10 +26,10 @@ int main(int argc, char * argv[]) {
   {
     v8::Isolate::Scope isolate_scope(isolate);
     v8::HandleScope handle_scope(isolate);
-    purr::Project::CreateInstance()->RunLoop(filePath.make_absolute().str());
+    purr::Game::CreateInstance()->RunLoop(filePath.make_absolute().str());
   }
 
   delete create_params.array_buffer_allocator;
-  purr::Project::DeleteInstance();
+  purr::Game::DeleteInstance();
   return 0;
 }
