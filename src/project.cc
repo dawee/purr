@@ -56,4 +56,24 @@ namespace purr {
   void Project::DeleteInstance() {
     delete instance;
   }
+
+  void Project::RunLoop(std::string mainPath) {
+    purr::Module * main = SaveModule(mainPath);
+    SDL_Event event;
+    bool quit = false;
+
+    while (!quit) {
+      while (SDL_PollEvent(&event) != 0) {
+        if (event.type == SDL_QUIT || (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE)) {
+          display->Hide();
+          quit = true;
+        }
+      }
+
+      main->CallExportedFunction("update");
+      display->Clear();
+      main->CallExportedFunction("draw");
+      display->Render();
+    }
+  }
 }

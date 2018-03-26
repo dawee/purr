@@ -35,6 +35,7 @@ namespace purr {
       Module * SaveModule(std::string);
       SDLDisplay * Display();
       void FeedContextAPI(v8::Local<v8::Context>);
+      void RunLoop(std::string);
   };
 
 }
