@@ -24,23 +24,43 @@ int main(int argc, char * argv[]) {
     SDL_WINDOW_SHOWN
   );
 
-  if (window == NULL) {
-    fprintf(stderr, "could not create window: %s\n", SDL_GetError());
+  if (window == nullptr) {
+    std::cerr << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
     return 1;
   }
 
-  SDL_Renderer * renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+  SDL_Renderer * renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
-  if (renderer == NULL){
-  	SDL_DestroyWindow(window);
-  	std::cout << "SDL_CreateRenderer Error: " << SDL_GetError() << std::endl;
-  	SDL_Quit();
-  	return 1;
+  if (renderer == nullptr){
+    SDL_DestroyWindow(window);
+    std::cerr << "SDL_CreateRenderer Error: " << SDL_GetError() << std::endl;
+    SDL_Quit();
+    return 1;
+  }
+
+  SDL_Surface * surface = SDL_CreateRGBSurface(0, SCREEN_WIDTH, SCREEN_HEIGHT, 32, 0, 0, 0, 0);
+
+  if (surface == nullptr){
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    std::cerr << "SDL_GetWindowSurface Error: " << SDL_GetError() << std::endl;
+    SDL_Quit();
+    return 1;
+  }
+
+  SDL_FillRect(surface, NULL, SDL_MapRGB(surface->format, 0, 0, 0));
+  SDL_Texture * texture = SDL_CreateTextureFromSurface(renderer, surface);
+  SDL_FreeSurface(surface);
+
+  if (texture == nullptr){
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    std::cerr << "SDL_CreateTextureFromSurface Error: " << SDL_GetError() << std::endl;
+    SDL_Quit();
+    return 1;
   }
 
   SDL_SetWindowBordered(window, SDL_TRUE);
-  SDL_Surface* screenSurface = SDL_GetWindowSurface(window);
-  SDL_FillRect(screenSurface, NULL, SDL_MapRGB(screenSurface->format, 0, 0, 0));
   SDL_UpdateWindowSurface(window);
 
   filesystem::path filePath(argv[1]);
@@ -69,7 +89,12 @@ int main(int argc, char * argv[]) {
       }
 
       main->CallExportedFunction("update");
+
+      SDL_RenderClear(renderer);
       main->CallExportedFunction("draw");
+      SDL_RenderCopy(renderer, texture, NULL, NULL);
+      SDL_RenderPresent(renderer);
+      SDL_Delay(16);
     }
   }
 
