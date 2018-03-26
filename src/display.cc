@@ -82,4 +82,15 @@ namespace purr {
   void SDLDisplay::Hide() {
     SDL_HideWindow(window);
   }
+
+  void SDLDisplay::DrawSDLTexture(SDL_Texture * texture, int width, int height) {
+    SDL_Rect rect;
+
+    rect.x = 0;
+    rect.y = 0;
+    rect.w = width;
+    rect.h = height;
+
+    SDL_RenderCopy(renderer, texture, NULL, &rect);
+  }
 }

@@ -9,7 +9,7 @@ namespace purr {
     public:
       static void Log(const v8::FunctionCallbackInfo<v8::Value>&);
 
-      Console(v8::Isolate*);
+      Console(v8::Isolate *);
   };
 }
 
