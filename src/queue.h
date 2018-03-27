@@ -11,13 +11,40 @@ namespace purr {
       SDL_mutex * mutex;
       std::queue<T *> q;
 
-      T * pop();
-      void push(T *);
+      T * pop() {
+        T * item = nullptr;
+
+        if (SDL_LockMutex(mutex) == 0) {
+          item = q.front();
+          q.pop();
+          SDL_UnlockMutex(mutex);
+        }
+
+        return item;
+      }
+
+      void push(T * item) {
+        if (SDL_LockMutex(mutex) == 0) {
+          q.push(item);
+          SDL_UnlockMutex(mutex);
+        }
+      }
 
     public:
-      Queue();
-      void Push(T *);
-      T * Pull();
+      Queue() {
+        sem = SDL_CreateSemaphore(0);
+        mutex = SDL_CreateMutex();
+      }
+
+      void Push(T * item) {
+        push(item);
+        SDL_SemPost(sem);
+      }
+
+      T * Pull() {
+        SDL_SemWait(sem);
+        return pop();
+      }
   };
 }
 

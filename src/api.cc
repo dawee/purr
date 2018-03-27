@@ -2,6 +2,7 @@
 
 #include "api.h"
 #include "game.h"
+#include "job.h"
 #include "texture.h"
 #include "util.h"
 
@@ -25,8 +26,9 @@ namespace purr {
     textureObject->SetInternalField(0, objectType);
     textureObject->SetInternalField(1, v8::External::New(isolate, texture));
 
-    texture->Load();
+    LoadTextureJob * job = new LoadTextureJob(texture);
 
+    Game::Instance()->PushJob(static_cast<Job *>(job));
     info.GetReturnValue().Set(textureObject);
   }
 

@@ -6,10 +6,6 @@
 namespace purr {
   int Texture::LoadTexture(void * texturePtr) {
     Texture * texture = static_cast<Texture *>(texturePtr);
-    SDLDisplay * display = Game::Instance()->Display();
-    SDL_Texture * sdlTexture = display->CreateSDLTextureFromImage(texture->filename);
-
-    texture->setSDLTexture(sdlTexture);
 
     return 0;
   }
@@ -31,19 +27,14 @@ namespace purr {
   }
 
   void Texture::Load() {
-    if (loadingThread != nullptr || sdlTexture != nullptr) {
+    if (sdlTexture != nullptr) {
       return;
     }
 
-    loadingThread = SDL_CreateThread(
-      Texture::LoadTexture,
-      filename.c_str(),
-      static_cast<void *>(this)
-    );
+    SDLDisplay * display = Game::Instance()->Display();
+    SDL_Texture * sdlTexture = display->CreateSDLTextureFromImage(filename);
 
-    if (loadingThread == nullptr) {
-      std::cerr << "SDL_CreateThread Error :" << SDL_GetError() << std::endl;
-    }
+    setSDLTexture(sdlTexture);
   }
 
   bool Texture::IsLoaded() {

@@ -7,7 +7,9 @@
 #include "api.h"
 #include "display.h"
 #include "console.h"
+#include "job.h"
 #include "module.h"
+#include "queue.h"
 
 namespace purr {
 
@@ -23,6 +25,7 @@ namespace purr {
       Module * main;
       std::string mainFilename;
       bool eventLoopActivated;
+      Queue<Job> jobsQueue;
 
       Game(std::string);
 
@@ -38,6 +41,7 @@ namespace purr {
       SDLDisplay * Display();
       void FeedContextAPI(v8::Local<v8::Context>);
       void RunLoop();
+      void PushJob(Job *);
   };
 
 }

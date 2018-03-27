@@ -1,6 +1,7 @@
 #include <v8/v8.h>
 #include <v8/libplatform/libplatform.h>
 
+#include "queue.h"
 #include "game.h"
 
 #define FPS 60
@@ -15,6 +16,8 @@ namespace purr {
     unsigned int currentDrawTime = SDL_GetTicks();
     unsigned int lastDrawTime = SDL_GetTicks();
     unsigned int fixedDeltaTime = 1000 / FPS;
+
+    SDL_SetThreadPriority(SDL_THREAD_PRIORITY_HIGH);
 
     v8::Platform* platform = v8::platform::CreateDefaultPlatform();
     v8::V8::InitializePlatform(platform);
@@ -48,6 +51,25 @@ namespace purr {
     }
 
     delete create_params.array_buffer_allocator;
+    return 0;
+  }
+
+  int Game::RunJobsLoop(void * gameInstancePtr) {
+    Game * game = static_cast<Game *>(gameInstancePtr);
+
+    SDL_SetThreadPriority(SDL_THREAD_PRIORITY_LOW);
+
+    while (game->eventLoopActivated) {
+      Job * job = game->jobsQueue.Pull();
+
+      if (job != nullptr) {
+        job->Run();
+        delete job;
+      } else {
+        SDL_Delay(2000 / FPS);
+      }
+    }
+
     return 0;
   }
 
@@ -102,9 +124,16 @@ namespace purr {
     display = new SDLDisplay();
 
     eventLoopActivated = true;
+
     SDL_Thread * renderingThread = SDL_CreateThread(
       Game::RunRenderingLoop,
       "rendering-loop",
+      gameInstancePtr
+    );
+
+    SDL_Thread * jobsThread = SDL_CreateThread(
+      Game::RunJobsLoop,
+      "jobs-loop",
       gameInstancePtr
     );
 
@@ -123,6 +152,12 @@ namespace purr {
       }
     }
 
+    jobsQueue.Push(new NoopJob());
+    SDL_WaitThread(jobsThread, NULL);
     SDL_WaitThread(renderingThread, NULL);
+  }
+
+  void Game::PushJob(Job * job) {
+    jobsQueue.Push(job);
   }
 }
