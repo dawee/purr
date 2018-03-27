@@ -40,7 +40,7 @@ V8_OBJECTS = \
 
 SDL2_OBJECTS = $(wildcard deps/SDL2-2.0.8/build/*.o)
 
-all: dist/purr
+all: deps dist/purr
 
 re: clean all
 

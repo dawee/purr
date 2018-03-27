@@ -2,4 +2,4 @@ release: Makefile
 	@make
 
 Makefile:
-	@./configure
+	@PATH=../SDL2-2.0.8:${PATH} ./configure
