@@ -31,6 +31,7 @@ namespace purr {
       static Game * CreateInstance(std::string mainFilename);
       static void DeleteInstance();
       static int RunRenderingLoop(void *);
+      static int RunJobsLoop(void *);
 
       Module * GetModuleFromRoot(v8::Local<v8::Object>);
       Module * SaveModule(std::string);
