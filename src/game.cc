@@ -40,6 +40,7 @@ namespace purr {
 
         if (currentDrawTime - lastDrawTime < fixedDeltaTime) {
           SDL_Delay(fixedDeltaTime - (currentDrawTime - lastDrawTime));
+          currentDrawTime = SDL_GetTicks();
         }
 
         game->display->Clear();
