@@ -1,9 +1,28 @@
 #include "game.h"
 
+#define FPS 60
+
 namespace purr {
   Game * Game::instance = NULL;
 
-  Game::Game(v8::Isolate * isolate, std::string mainFilename) : isolate(isolate), mainFilename(mainFilename) {
+  int Game::RunEventLoop(void * gameInstancePtr) {
+    Game * game = static_cast<Game *>(gameInstancePtr);
+    SDL_Event event;
+
+    while (game->eventLoopActivated) {
+      while (SDL_PollEvent(&event) != 0) {
+        if (event.type == SDL_QUIT || (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE)) {
+          game->display->Hide();
+          game->eventLoopActivated = false;
+        }
+      }
+    }
+
+    return 0;
+  }
+
+  Game::Game(v8::Isolate * isolate) : isolate(isolate) {
+    eventLoopActivated = false;
     api = new API(isolate);
     console = new Console(isolate);
     display = new SDLDisplay();
@@ -21,7 +40,8 @@ namespace purr {
 
   Game * Game::CreateInstance(v8::Isolate * isolate, std::string mainFilename) {
     if (instance == nullptr) {
-      instance = new Game(isolate, mainFilename);
+      instance = new Game(isolate);
+      instance->main = instance->SaveModule(mainFilename);
     }
 
     return instance;
@@ -58,22 +78,36 @@ namespace purr {
   }
 
   void Game::RunLoop() {
-    purr::Module * main = SaveModule(mainFilename);
-    SDL_Event event;
-    bool quit = false;
+    void * gameInstancePtr = static_cast<void *>(this);
+    unsigned int currentUpdateTime = SDL_GetTicks();
+    unsigned int lastUpdateTime = SDL_GetTicks();
+    unsigned int currentDrawTime = SDL_GetTicks();
+    unsigned int lastDrawTime = SDL_GetTicks();
+    unsigned int fixedDeltaTime = 1000 / FPS;
 
-    while (!quit) {
-      while (SDL_PollEvent(&event) != 0) {
-        if (event.type == SDL_QUIT || (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE)) {
-          display->Hide();
-          quit = true;
-        }
+    eventLoopActivated = true;
+    SDL_Thread * eventLoopThread = SDL_CreateThread(
+      Game::RunEventLoop,
+      "event-loop",
+      gameInstancePtr
+    );
+
+    while (eventLoopActivated) {
+      currentUpdateTime = SDL_GetTicks();
+      main->CallExportedFunction("update");
+      currentDrawTime = SDL_GetTicks();
+
+      if (currentDrawTime - lastDrawTime < fixedDeltaTime) {
+        SDL_Delay(fixedDeltaTime - (currentDrawTime - lastDrawTime));
       }
 
-      main->CallExportedFunction("update");
       display->Clear();
       main->CallExportedFunction("draw");
       display->Render();
+      lastDrawTime = currentDrawTime;
+      lastUpdateTime = currentUpdateTime;
     }
+
+    SDL_WaitThread(eventLoopThread, NULL);
   }
 }

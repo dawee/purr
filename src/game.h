@@ -20,9 +20,11 @@ namespace purr {
       Console * console;
       SDLDisplay * display;
       std::map<std::string, Module *> modules;
+      Module * main;
       std::string mainFilename;
+      bool eventLoopActivated;
 
-      Game(v8::Isolate *, std::string);
+      Game(v8::Isolate *);
 
     protected:
       ~Game();
@@ -31,6 +33,7 @@ namespace purr {
       static Game * Instance();
       static Game * CreateInstance(v8::Isolate *, std::string mainFilename);
       static void DeleteInstance();
+      static int RunEventLoop(void *);
 
       Module * GetModuleFromRoot(v8::Local<v8::Object>);
       Module * SaveModule(std::string);
