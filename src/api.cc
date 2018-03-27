@@ -7,6 +7,13 @@
 #include "util.h"
 
 namespace purr {
+  static void OnTextureObjectDestroyed(const v8::WeakCallbackInfo<Texture> &data) {
+    Texture * texture = data.GetParameter();
+    DestroyTextureJob * job = new DestroyTextureJob(texture);
+
+    Game::Instance()->PushJob(static_cast<Job *>(job));
+  }
+
   void API::LoadTexture(const v8::FunctionCallbackInfo<v8::Value>& info) {
     if (info.Length() == 0) {
       std::cerr << "Error: no filename given to loadTexture" << std::endl;
@@ -22,9 +29,14 @@ namespace purr {
 
     v8::Local<v8::Object> textureObject = textureObjectTemplate->NewInstance();
     v8::Local<v8::Number> objectType = v8::Number::New(isolate, ObjectType::TEXTURE);
+    v8::Persistent<v8::Object> pTextureObject;
 
     textureObject->SetInternalField(0, objectType);
     textureObject->SetInternalField(1, v8::External::New(isolate, texture));
+
+    pTextureObject.Reset(isolate, textureObject);
+    pTextureObject.SetWeak(texture, OnTextureObjectDestroyed, v8::WeakCallbackType::kParameter);
+    pTextureObject.MarkIndependent();
 
     LoadTextureJob * job = new LoadTextureJob(texture);
 

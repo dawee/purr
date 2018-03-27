@@ -28,6 +28,7 @@ namespace purr {
       void Draw(SDLDisplay *, int, int);
 
       Texture(std::string);
+      ~Texture();
   };
 }
 

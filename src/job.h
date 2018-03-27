@@ -6,7 +6,8 @@
 namespace purr {
   enum JobType {
     NOOP,
-    LOAD_TEXTURE
+    LOAD_TEXTURE,
+    DESTROY_TEXTURE
   };
 
   class Job {
@@ -33,6 +34,15 @@ namespace purr {
 
     public:
       LoadTextureJob(Texture *);
+      void Run();
+  };
+
+  class DestroyTextureJob : public Job {
+    private:
+      Texture * texture;
+
+    public:
+      DestroyTextureJob(Texture *);
       void Run();
   };
 }

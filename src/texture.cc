@@ -16,6 +16,12 @@ namespace purr {
     mutex = SDL_CreateMutex();
   }
 
+  Texture::~Texture() {
+    if (sdlTexture != nullptr) {
+      SDL_DestroyTexture(sdlTexture);
+    }
+  }
+
   void Texture::setSDLTexture(SDL_Texture * sdlTexture) {
     if (SDL_LockMutex(mutex) == 0) {
       SDL_QueryTexture(sdlTexture, &format, &access, &width, &height);
