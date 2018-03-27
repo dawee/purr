@@ -7,17 +7,9 @@ namespace purr {
   int Texture::LoadTexture(void * texturePtr) {
     Texture * texture = static_cast<Texture *>(texturePtr);
     SDLDisplay * display = Game::Instance()->Display();
-
     SDL_Texture * sdlTexture = display->CreateSDLTextureFromImage(texture->filename);
-    SDL_QueryTexture(
-      sdlTexture,
-      &(texture->format),
-      &(texture->access),
-      &(texture->width),
-      &(texture->height)
-    );
 
-    texture->sdlTexture = sdlTexture;
+    texture->setSDLTexture(sdlTexture);
 
     return 0;
   }
@@ -25,6 +17,17 @@ namespace purr {
   Texture::Texture(std::string filename) : filename(filename) {
     sdlTexture = nullptr;
     loadingThread = nullptr;
+    mutex = SDL_CreateMutex();
+  }
+
+  void Texture::setSDLTexture(SDL_Texture * sdlTexture) {
+    if (SDL_LockMutex(mutex) == 0) {
+      SDL_QueryTexture(sdlTexture, &format, &access, &width, &height);
+
+      this->sdlTexture = sdlTexture;
+
+      SDL_UnlockMutex(mutex);
+    }
   }
 
   void Texture::Load() {
@@ -48,8 +51,12 @@ namespace purr {
   }
 
   void Texture::Draw(SDLDisplay * display, int x, int y) {
-    if (IsLoaded()) {
-      display->DrawSDLTexture(sdlTexture, x, y, width, height);
+    if (SDL_LockMutex(mutex) == 0) {
+      if (IsLoaded()) {
+        display->DrawSDLTexture(sdlTexture, x, y, width, height);
+      }
+
+      SDL_UnlockMutex(mutex);
     }
   }
 

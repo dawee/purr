@@ -11,11 +11,14 @@ namespace purr {
     private:
       SDL_Texture * sdlTexture;
       SDL_Thread * loadingThread;
+      SDL_mutex * mutex;
       std::string filename;
       Uint32 format;
       int access;
       int width;
       int height;
+
+      void setSDLTexture(SDL_Texture *);
 
     public:
       static int LoadTexture(void *);
