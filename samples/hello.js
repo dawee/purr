@@ -2,7 +2,8 @@ const mallow = purr.loadTexture(`${__dirname__}/asset/mallow.bmp`);
 
 let x = 0;
 
-const update = () => {
+const update = dt => {
+  console.log(dt);
   x ++;
 }
 

@@ -9,6 +9,8 @@
 #include "util.h"
 
 namespace purr {
+  static void noop(const v8::FunctionCallbackInfo<v8::Value>&) {}
+
   void Module::ExportsGetter(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
     v8::Local<v8::Value> exports = Game::Instance()->GetModuleFromRoot(info.Holder())->GetExports();
     info.GetReturnValue().Set(exports);
@@ -72,30 +74,44 @@ namespace purr {
     v8::Script::Compile(context, source).ToLocalChecked()->Run(context).ToLocalChecked();
   }
 
-  void Module::CallExportedFunction(const char * name) {
-    v8::Context::Scope context_scope(context);
+  v8::Local<v8::Function> Module::getExportedFunction(const char * name) {
     v8::Local<v8::Value> localExports = v8::Local<v8::Value>::New(isolate, exports);
 
     if (!localExports->IsObject()) {
-      return;
+      return v8::Function::New(context, noop).ToLocalChecked();
     }
 
     v8::Local<v8::Object> exportsObject = localExports->ToObject();
     v8::Local<v8::String> key = v8::String::NewFromUtf8(isolate, name);
 
     if (!exportsObject->Has(key)) {
-      return;
+      return v8::Function::New(context, noop).ToLocalChecked();
     }
 
     v8::Local<v8::Value> field = exportsObject->Get(key);
 
     if (!field->IsFunction()) {
-      return;
+      return v8::Function::New(context, noop).ToLocalChecked();
     }
 
-    v8::Local<v8::Function> func = v8::Local<v8::Function>::Cast(field);
+    return v8::Local<v8::Function>::Cast(field);
+  }
+
+  void Module::CallExportedFunction(const char * name) {
+    v8::Context::Scope context_scope(context);
+    v8::Local<v8::Function> func = getExportedFunction(name);
 
     func->Call(func, 0, NULL);
+  }
+
+  void Module::CallExportedFunction(const char * name, unsigned param) {
+    v8::Context::Scope context_scope(context);
+    v8::Local<v8::Function> func = getExportedFunction(name);
+    v8::Handle<v8::Value> args[1];
+
+    args[0] = v8::Number::New(isolate, param);
+
+    func->Call(func, 1, args);
   }
 
   v8::Local<v8::Value> Module::GetExports() {

@@ -13,8 +13,6 @@ namespace purr {
     Game * game = static_cast<Game *>(gameInstancePtr);
     unsigned int currentUpdateTime = SDL_GetTicks();
     unsigned int lastUpdateTime = SDL_GetTicks();
-    unsigned int currentDrawTime = SDL_GetTicks();
-    unsigned int lastDrawTime = SDL_GetTicks();
     unsigned int fixedDeltaTime = 1000 / FPS;
 
     SDL_SetThreadPriority(SDL_THREAD_PRIORITY_HIGH);
@@ -35,18 +33,16 @@ namespace purr {
 
       while (game->eventLoopActivated) {
         currentUpdateTime = SDL_GetTicks();
-        game->main->CallExportedFunction("update");
-        currentDrawTime = SDL_GetTicks();
 
-        if (currentDrawTime - lastDrawTime < fixedDeltaTime) {
-          SDL_Delay(fixedDeltaTime - (currentDrawTime - lastDrawTime));
-          currentDrawTime = SDL_GetTicks();
+        if (currentUpdateTime - lastUpdateTime < fixedDeltaTime) {
+          SDL_Delay(fixedDeltaTime - (currentUpdateTime - lastUpdateTime));
+          currentUpdateTime = SDL_GetTicks();
         }
 
         game->display->Clear();
         game->main->CallExportedFunction("draw");
         game->display->Render();
-        lastDrawTime = currentDrawTime;
+        game->main->CallExportedFunction("update", currentUpdateTime - lastUpdateTime);
         lastUpdateTime = currentUpdateTime;
       }
     }
