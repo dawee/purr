@@ -15,21 +15,9 @@ int main(int argc, char * argv[]) {
   }
 
   filesystem::path filePath(argv[1]);
+  std::string mainFilename = filePath.make_absolute().str();
 
-  v8::Platform* platform = v8::platform::CreateDefaultPlatform();
-  v8::V8::InitializePlatform(platform);
-  v8::V8::Initialize();
-  v8::Isolate::CreateParams create_params;
-  create_params.array_buffer_allocator = v8::ArrayBuffer::Allocator::NewDefaultAllocator();
-
-  v8::Isolate* isolate = v8::Isolate::New(create_params);
-  {
-    v8::Isolate::Scope isolate_scope(isolate);
-    v8::HandleScope handle_scope(isolate);
-    purr::Game::CreateInstance(isolate, filePath.make_absolute().str())->RunLoop();
-  }
-
-  delete create_params.array_buffer_allocator;
+  purr::Game::CreateInstance(mainFilename)->RunLoop();
   purr::Game::DeleteInstance();
   return 0;
 }

@@ -24,16 +24,13 @@ namespace purr {
       std::string mainFilename;
       bool eventLoopActivated;
 
-      Game(v8::Isolate *);
-
-    protected:
-      ~Game();
+      Game(std::string);
 
     public:
       static Game * Instance();
-      static Game * CreateInstance(v8::Isolate *, std::string mainFilename);
+      static Game * CreateInstance(std::string mainFilename);
       static void DeleteInstance();
-      static int RunEventLoop(void *);
+      static int RunRenderingLoop(void *);
 
       Module * GetModuleFromRoot(v8::Local<v8::Object>);
       Module * SaveModule(std::string);
