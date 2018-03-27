@@ -1,8 +1,4 @@
 #include <iostream>
-
-#include <SDL2/SDL.h>
-#include <v8/v8.h>
-#include <v8/libplatform/libplatform.h>
 #include <filesystem/path.h>
 #include <filesystem/resolver.h>
 
