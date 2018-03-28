@@ -46,7 +46,6 @@ all: dist/purr
 re: clean all
 
 dist/purr: deps ${OBJECTS}
-	@echo ${SDL2_IMAGE_OBJECTS}
 	@mkdir -p dist
 	@echo $@
 	@${CXX} ${V8_OBJECTS} ${SDL2_OBJECTS} ${SDL2_IMAGE_OBJECTS} ${OBJECTS} -o $@ ${CXX_FLAGS} ${LDFLAGS}
