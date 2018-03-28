@@ -18,14 +18,14 @@ namespace purr {
       int width;
       int height;
 
-      void setSDLTexture(SDL_Texture *);
-
     public:
       static int LoadTexture(void *);
 
       void Load();
       bool IsLoaded();
       void Draw(SDLDisplay *, int, int);
+      int Width();
+      int Height();
 
       Texture(std::string);
       ~Texture();

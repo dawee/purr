@@ -22,29 +22,29 @@ namespace purr {
     }
   }
 
-  void Texture::setSDLTexture(SDL_Texture * sdlTexture) {
+  void Texture::Load() {
     if (SDL_LockMutex(mutex) == 0) {
-      SDL_QueryTexture(sdlTexture, &format, &access, &width, &height);
-
-      this->sdlTexture = sdlTexture;
+      if (sdlTexture == nullptr) {
+        SDLDisplay * display = Game::Instance()->Display();
+        SDL_Texture * sdlTexture = display->CreateSDLTextureFromImage(filename);
+        SDL_QueryTexture(sdlTexture, &format, &access, &width, &height);
+        this->sdlTexture = sdlTexture;
+      }
 
       SDL_UnlockMutex(mutex);
     }
   }
 
-  void Texture::Load() {
-    if (sdlTexture != nullptr) {
-      return;
+  bool Texture::IsLoaded() {
+    bool isLoaded = false;
+
+    if (SDL_LockMutex(mutex) == 0) {
+      isLoaded = (sdlTexture != nullptr);
+
+      SDL_UnlockMutex(mutex);
     }
 
-    SDLDisplay * display = Game::Instance()->Display();
-    SDL_Texture * sdlTexture = display->CreateSDLTextureFromImage(filename);
-
-    setSDLTexture(sdlTexture);
-  }
-
-  bool Texture::IsLoaded() {
-    return sdlTexture != nullptr;
+    return isLoaded;
   }
 
   void Texture::Draw(SDLDisplay * display, int x, int y) {
@@ -57,4 +57,25 @@ namespace purr {
     }
   }
 
+  int Texture::Width() {
+    int width = 0;
+
+    if (SDL_LockMutex(mutex) == 0) {
+      width = this->width;
+      SDL_UnlockMutex(mutex);
+    }
+
+    return width;
+  }
+
+  int Texture::Height()  {
+    int height = 0;
+
+    if (SDL_LockMutex(mutex) == 0) {
+      height = this->height;
+      SDL_UnlockMutex(mutex);
+    }
+
+    return height;
+  }
 }
