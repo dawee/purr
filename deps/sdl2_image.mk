@@ -1,17 +1,19 @@
 UNAME := $(shell uname)
 SOURCES := $(wildcard *.c)
+INCLUDES := -I../../deps/include/SDL2 -I.
 
-ifeq ($(UNAME), Darwin)
-	SOURCES := ${SOURCES} $(wildcard *.m)
+ifeq ($(UNAME), Linux)
+	CC := gcc
+	CC_FLAGS := ${INCLUDES}
 endif
 
-OBJECTS := $(patsubst %.m,build/%_m.o,$(patsubst %.c,build/%_c.o,$(SOURCES)))
-
-build/%_m.o: %.m build
-	@echo $< $@
+ifeq ($(UNAME), Darwin)
+	CC := clang
+	CC_FLAGS := ${INCLUDES}
+endif
 
 build/%_c.o: %.c build
-	@echo $< $@
+	${CC} -c $< -o $@ ${CC_FLAGS}
 
 build:
 	@mkdir -p build
