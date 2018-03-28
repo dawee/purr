@@ -4,7 +4,7 @@ INCLUDES := -I../../deps/include/SDL2 -I.
 
 ifeq ($(UNAME), Linux)
 	CC := gcc
-	CC_FLAGS := ${INCLUDES} -DLOAD_PNG
+	CC_FLAGS := ${INCLUDES} -DLOAD_PNG -DLOAD_JPG
 endif
 
 ifeq ($(UNAME), Darwin)
@@ -15,15 +15,14 @@ endif
 
 OBJECTS := $(patsubst %.m,build/%_m.o,$(patsubst %.c,build/%_c.o,$(SOURCES)))
 
-build/%_m.o: %.m build
+build/%_m.o: %.m
 	@echo $@
-	@${CC} -c $< -o $@ ${CC_FLAGS}
-
-build/%_c.o: %.c build
-	@echo $@
-	@${CC} -c $< -o $@ ${CC_FLAGS}
-
-build:
 	@mkdir -p build
+	@${CC} -c $< -o $@ ${CC_FLAGS}
+
+build/%_c.o: %.c
+	@echo $@
+	@mkdir -p build
+	@${CC} -c $< -o $@ ${CC_FLAGS}
 
 release: ${OBJECTS}
