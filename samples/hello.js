@@ -1,11 +1,10 @@
-const mallow = purr.loadTexture(`${__dirname__}/asset/mallow.bmp`);
+const mallow = purr.loadTexture(`${__dirname__}/asset/mallow.png`);
 
 let x = 0;
 
 const update = dt => {
-  console.log(dt);
-  x ++;
-}
+  x += dt / 10;
+};
 
 const draw = () => purr.drawTexture(mallow, x, 0);
 

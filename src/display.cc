@@ -1,4 +1,5 @@
 #include <iostream>
+#include <SDL2/SDL_Image.h>
 
 #include "display.h"
 
@@ -45,7 +46,7 @@ namespace purr {
   }
 
   SDL_Texture * SDLDisplay::CreateSDLTextureFromImage(std::string filename) {
-    SDL_Surface * surface = SDL_LoadBMP(filename.c_str());
+    SDL_Surface * surface = IMG_Load(filename.c_str());
 
     if (surface == nullptr) {
     	std::cout << "SDL_LoadBMP Error: " << SDL_GetError() << std::endl;

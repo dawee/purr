@@ -39,15 +39,17 @@ V8_OBJECTS = \
 	$(wildcard deps/v8/out.gn/x64.release/obj/buildtools/third_party/libc++/libc++/*.o)
 
 SDL2_OBJECTS = $(wildcard deps/SDL2-2.0.8/build/*.o)
+SDL2_IMAGE_OBJECTS = $(wildcard deps/SDL2_image-2.0.3/build/*.o)
 
-all: deps dist/purr
+all: dist/purr
 
 re: clean all
 
-dist/purr: ${OBJECTS}
+dist/purr: deps ${OBJECTS}
+	@echo ${SDL2_IMAGE_OBJECTS}
 	@mkdir -p dist
 	@echo $@
-	@${CXX} ${V8_OBJECTS} ${SDL2_OBJECTS} ${OBJECTS} -o $@ ${CXX_FLAGS} ${LDFLAGS}
+	@${CXX} ${V8_OBJECTS} ${SDL2_OBJECTS} ${SDL2_IMAGE_OBJECTS} ${OBJECTS} -o $@ ${CXX_FLAGS} ${LDFLAGS}
 
 build/%.o: src/%.cc
 	@mkdir -p build
