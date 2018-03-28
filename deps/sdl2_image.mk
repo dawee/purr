@@ -4,7 +4,7 @@ INCLUDES := -I../../deps/include/SDL2 -I.
 
 ifeq ($(UNAME), Linux)
 	CC := gcc
-	CC_FLAGS := ${INCLUDES}
+	CC_FLAGS := ${INCLUDES} -DLOAD_PNG
 endif
 
 ifeq ($(UNAME), Darwin)

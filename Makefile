@@ -6,7 +6,7 @@ OBJECTS := $(patsubst src/%.cc,build/%.o,$(SOURCES))
 ifeq ($(UNAME), Linux)
 	CXX := g++
 	CXX_FLAGS := ${INCLUDES} --std=c++11 -pthread
-	LDFLAGS := -ldl
+	LDFLAGS := -ldl -lpng
 endif
 
 ifeq ($(UNAME), Darwin)

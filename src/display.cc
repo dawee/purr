@@ -49,8 +49,8 @@ namespace purr {
     SDL_Surface * surface = IMG_Load(filename.c_str());
 
     if (surface == nullptr) {
-    	std::cout << "SDL_LoadBMP Error: " << SDL_GetError() << std::endl;
-    	return nullptr;
+      std::cout << "IMG_Load Error: " << SDL_GetError() << std::endl;
+      return nullptr;
     }
 
     SDL_Texture * sdlTexture = SDL_CreateTextureFromSurface(renderer, surface);
