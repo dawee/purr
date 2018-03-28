@@ -8,8 +8,8 @@ v8-release: v8/purr.v8.mk include/v8
 sdl2-release: SDL2-2.0.8/purr.sdl2.mk include/SDL2
 	@make -C SDL2-2.0.8 -f purr.sdl2.mk release
 
-sdl2_image-release: SDL2_image-2.0.3/purr.sdl2.mk
-	# @make -C SDL2_image-2.0.3 -f purr.sdl2.mk release
+sdl2_image-release: SDL2_image-2.0.3/purr.sdl2_image.mk
+	@make -C SDL2_image-2.0.3 -f purr.sdl2_image.mk release
 
 filesystem-release: include/filesystem
 
@@ -25,8 +25,8 @@ include/SDL2: include SDL2-2.0.8
 include:
 	@mkdir include
 
-SDL2_image-2.0.3/purr.sdl2.mk: SDL2_image-2.0.3 sdl2.mk
-	@cp sdl2.mk $@
+SDL2_image-2.0.3/purr.sdl2_image.mk: SDL2_image-2.0.3 sdl2_image.mk
+	@cp sdl2_image.mk $@
 
 SDL2-2.0.8/purr.sdl2.mk: SDL2-2.0.8 sdl2.mk
 	@cp sdl2.mk $@
