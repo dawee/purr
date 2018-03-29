@@ -7,6 +7,37 @@
 #include "util.h"
 
 namespace purr {
+  static Texture * getTextureFromValue(v8::Local<v8::Value> value, const char * apiName) {
+    if (!value->IsObject()) {
+      std::cerr << "Error: given argument to " << apiName << " is not an object" << std::endl;
+      return nullptr;
+    }
+
+    v8::Local<v8::Object> textureObject = value->ToObject();
+
+    if (textureObject->InternalFieldCount() != 2) {
+      std::cerr << "Error: given argument to " << apiName << " is not a Purr native object" << std::endl;
+      return nullptr;
+    }
+
+    v8::Isolate * isolate = textureObject->GetIsolate();
+
+    if (textureObject->GetInternalField(0)->ToNumber(isolate)->Int32Value() != ObjectType::TEXTURE) {
+      std::cerr << "Error: given argument to " << apiName << " is not a texture" << std::endl;
+      return nullptr;
+    }
+
+    v8::Local<v8::External> textureWrap = v8::Local<v8::External>::Cast(textureObject->GetInternalField(1));
+    Texture * texture = static_cast<Texture *>(textureWrap->Value());
+
+    if (texture == nullptr) {
+      std::cerr << "Internal Purr Error: SDL texture has been somehow destroyed" << std::endl;
+      return nullptr;
+    }
+
+    return texture;
+  }
+
   static void OnTextureObjectDestroyed(const v8::WeakCallbackInfo<Texture> &data) {
     Texture * texture = data.GetParameter();
     DestroyTextureJob * job = new DestroyTextureJob(texture);
@@ -25,6 +56,8 @@ namespace purr {
     Texture * texture = new Texture(filename);
 
     v8::Local<v8::ObjectTemplate> textureObjectTemplate = v8::ObjectTemplate::New(isolate);
+    textureObjectTemplate->SetAccessor(v8::String::NewFromUtf8(isolate, "width"), &API::GetTextureWidth);
+
     textureObjectTemplate->SetInternalFieldCount(2);
 
     v8::Local<v8::Object> textureObject = textureObjectTemplate->NewInstance();
@@ -44,43 +77,32 @@ namespace purr {
     info.GetReturnValue().Set(textureObject);
   }
 
+  void API::GetTextureWidth(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+    v8::Local<v8::Object> textureObject = info.Holder();
+    Texture * texture = getTextureFromValue(textureObject, "getTextureWidth");
+    int width = 0;
+
+    if (texture != nullptr) {
+      width = texture->Width();
+    }
+
+    info.GetReturnValue().Set(v8::Number::New(textureObject->GetIsolate(), width));
+  }
+
   void API::DrawTexture(const v8::FunctionCallbackInfo<v8::Value>& info) {
     if (info.Length() == 0) {
       std::cerr << "Error: no texture given to drawTexture" << std::endl;
       return;
     }
 
-    if (!info[0]->IsObject()) {
-      std::cerr << "Error: given argument to drawTexture is not an object" << std::endl;
-      return;
+    Texture * texture = getTextureFromValue(info[0], "drawTexture");
+
+    if (texture != nullptr) {
+      int x = info.Length() > 1 ? info[1]->Int32Value() : 0;
+      int y = info.Length() > 2 ? info[2]->Int32Value() : 0;
+
+      texture->Draw(Game::Instance()->Display(), x, y);
     }
-
-    v8::Local<v8::Object> textureObject = info[0]->ToObject();
-
-    if (textureObject->InternalFieldCount() != 2) {
-      std::cerr << "Error: given argument to drawTexture is not a Purr native object" << std::endl;
-      return;
-    }
-
-    v8::Isolate * isolate = info.This()->GetIsolate();
-
-    if (textureObject->GetInternalField(0)->ToNumber(isolate)->Int32Value() != ObjectType::TEXTURE) {
-      std::cerr << "Error: given argument to drawTexture is not a texture" << std::endl;
-      return;
-    }
-
-    v8::Local<v8::External> textureWrap = v8::Local<v8::External>::Cast(textureObject->GetInternalField(1));
-    Texture * texture = static_cast<Texture *>(textureWrap->Value());
-
-    if (texture == nullptr) {
-      std::cerr << "Internal Purr Error: SDL texture has been somehow destroyed" << std::endl;
-      return;
-    }
-
-    int x = info.Length() > 1 ? info[1]->Int32Value() : 0;
-    int y = info.Length() > 2 ? info[2]->Int32Value() : 0;
-
-    texture->Draw(Game::Instance()->Display(), x, y);
   }
 
   API::API(v8::Isolate* isolate) : Feeder::Feeder(isolate) {
