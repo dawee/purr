@@ -11,10 +11,6 @@ namespace purr {
 
   class API : public Feeder {
     public:
-      static void DrawTexture(const v8::FunctionCallbackInfo<v8::Value>&);
-      static void LoadTexture(const v8::FunctionCallbackInfo<v8::Value>&);
-      static void GetTextureWidth(v8::Local<v8::String>, const v8::PropertyCallbackInfo<v8::Value>&);
-
       API(v8::Isolate*);
   };
 }
