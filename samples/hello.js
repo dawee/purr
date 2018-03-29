@@ -4,7 +4,7 @@ let x = 0;
 
 const update = dt => {
   x += dt / 10;
-  console.log(mallow.width, mallow.height);
+  console.log(mallow.loaded);
 };
 
 const draw = () => purr.drawTexture(mallow, x, 0);
