@@ -26,11 +26,32 @@ namespace purr {
     info.GetReturnValue().Set(module);
   }
 
+  void Module::Require(const v8::FunctionCallbackInfo<v8::Value>& info) {
+    Module * module = Game::Instance()->GetModuleFromRoot(info.Holder());
+
+    if (info.Length() == 0) {
+      std::cerr << "Error: require() called without any arguments";
+      return;
+    }
+
+    if (!info[0]->IsString()) {
+      std::cerr << "Error: require() called with an invalid type (string expected)";
+      return;
+    }
+
+    std::string relativePath = ValueToSTDString(info[0]);
+    filesystem::path dirPath(module->GetDir());
+    Module * requiredModule = Game::Instance()->SaveModule((dirPath / relativePath).make_absolute().str());
+
+    info.GetReturnValue().Set(requiredModule->GetExports());
+  }
+
   Module::Module(v8::Isolate * isolate, std::string filename) : isolate(isolate), filename(filename) {
     v8::Local<v8::ObjectTemplate> moduleTemplate = v8::ObjectTemplate::New(isolate);
 
     moduleTemplate->SetAccessor(v8::String::NewFromUtf8(isolate, "exports"), &ExportsGetter, &ExportsSetter);
     moduleTemplate->SetAccessor(v8::String::NewFromUtf8(isolate, "module"), &ModuleGetter);
+    moduleTemplate->Set(v8::String::NewFromUtf8(isolate, "require"), v8::FunctionTemplate::New(isolate, &Require));
 
     context = v8::Context::New(isolate, NULL, moduleTemplate);
     v8::Context::Scope context_scope(context);
@@ -52,7 +73,8 @@ namespace purr {
     scriptFile.open(filename);
 
     if (!scriptFile.is_open()) {
-      std::cerr << "failed to read" << filename << std::endl;
+      std::cerr << "could not find module " << filename << std::endl;
+      return;
     }
 
     std::string scriptSource;

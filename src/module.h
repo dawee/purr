@@ -23,6 +23,7 @@ namespace purr {
       static void ExportsGetter(v8::Local<v8::String>, const v8::PropertyCallbackInfo<v8::Value>&);
       static void ExportsSetter(v8::Local<v8::String>, v8::Local<v8::Value>, const v8::PropertyCallbackInfo<void>&);
       static void ModuleGetter(v8::Local<v8::String>, const v8::PropertyCallbackInfo<v8::Value>&);
+      static void Require(const v8::FunctionCallbackInfo<v8::Value>&);
 
       void Run();
       void CallExportedFunction(const char *);
