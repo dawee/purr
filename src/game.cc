@@ -39,10 +39,10 @@ namespace purr {
           currentUpdateTime = SDL_GetTicks();
         }
 
+        game->main->CallExportedFunction("update", currentUpdateTime - lastUpdateTime);
         game->display->Clear();
         game->main->CallExportedFunction("draw");
         game->display->Render();
-        game->main->CallExportedFunction("update", currentUpdateTime - lastUpdateTime);
         lastUpdateTime = currentUpdateTime;
       }
     }
