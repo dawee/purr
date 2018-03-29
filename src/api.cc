@@ -57,6 +57,18 @@ namespace purr {
     info.GetReturnValue().Set(v8::Number::New(textureObject->GetIsolate(), width));
   }
 
+  static void getTextureHeight(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+    v8::Local<v8::Object> textureObject = info.Holder();
+    Texture * texture = getTextureFromValue(textureObject, "getTextureHeight");
+    int height = 0;
+
+    if (texture != nullptr) {
+      height = texture->Height();
+    }
+
+    info.GetReturnValue().Set(v8::Number::New(textureObject->GetIsolate(), height));
+  }
+
   static void loadTexture(const v8::FunctionCallbackInfo<v8::Value>& info) {
     if (info.Length() == 0) {
       std::cerr << "Error: no filename given to loadTexture" << std::endl;
@@ -69,6 +81,7 @@ namespace purr {
 
     v8::Local<v8::ObjectTemplate> textureObjectTemplate = v8::ObjectTemplate::New(isolate);
     textureObjectTemplate->SetAccessor(v8::String::NewFromUtf8(isolate, "width"), &getTextureWidth);
+    textureObjectTemplate->SetAccessor(v8::String::NewFromUtf8(isolate, "height"), &getTextureHeight);
 
     textureObjectTemplate->SetInternalFieldCount(2);
 
