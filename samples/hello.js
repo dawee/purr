@@ -1,4 +1,5 @@
-const {updateX} = require('./update.js');
+const {updateX} = require('./update');
+
 const mallow = purr.loadTexture(`${__dirname__}/asset/mallow.png`);
 
 let x = 0;

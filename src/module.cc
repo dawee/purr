@@ -41,9 +41,21 @@ namespace purr {
 
     std::string relativePath = ValueToSTDString(info[0]);
     filesystem::path dirPath(module->GetDir());
-    Module * requiredModule = Game::Instance()->SaveModule((dirPath / relativePath).make_absolute().str());
+    filesystem::path fullPath(dirPath / relativePath);
 
-    info.GetReturnValue().Set(requiredModule->GetExports());
+    if (fullPath.is_file()) {
+      Module * requiredModule = Game::Instance()->SaveModule(fullPath.make_absolute().str());
+      info.GetReturnValue().Set(requiredModule->GetExports());
+      return;
+    }
+
+    filesystem::path fullPathJS(fullPath.str() + ".js");
+
+    if (fullPathJS.is_file()) {
+      Module * requiredModule = Game::Instance()->SaveModule(fullPathJS.make_absolute().str());
+      info.GetReturnValue().Set(requiredModule->GetExports());
+      return;
+    }
   }
 
   Module::Module(v8::Isolate * isolate, std::string filename) : isolate(isolate), filename(filename) {
