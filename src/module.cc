@@ -56,6 +56,15 @@ namespace purr {
       info.GetReturnValue().Set(requiredModule->GetExports());
       return;
     }
+
+    filesystem::path indexName("index.js");
+    filesystem::path fullPathIndexJS(fullPath / indexName);
+
+    if (fullPathIndexJS.is_file()) {
+      Module * requiredModule = Game::Instance()->SaveModule(fullPathIndexJS.make_absolute().str());
+      info.GetReturnValue().Set(requiredModule->GetExports());
+      return;
+    }
   }
 
   Module::Module(v8::Isolate * isolate, std::string filename) : isolate(isolate), filename(filename) {
