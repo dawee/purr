@@ -30,7 +30,7 @@ namespace purr {
 
       game->api = new API(game->isolate, game->display, static_cast<Worker *>(game));
       game->console = new Console(game->isolate);
-      game->main = game->SaveModule(game->mainFilename);
+      game->main = game->Save(game->mainFilename);
 
       while (game->eventLoopActivated) {
         currentUpdateTime = SDL_GetTicks();
@@ -85,15 +85,15 @@ namespace purr {
     return instance;
   }
 
-  Module * Game::GetModuleFromRoot(v8::Local<v8::Object> root) {
+  Module * Game::GetFromHolder(v8::Local<v8::Object> root) {
     std::string filename = Module::GetFilenameFromRoot(root);
 
     return modules[filename];
   }
 
-  Module * Game::SaveModule(std::string filename) {
+  Module * Game::Save(std::string filename) {
     if (modules.count(filename) == 0) {
-      modules[filename] = new Module(isolate, filename);
+      modules[filename] = new Module(isolate, filename, static_cast<Registry<Module> *>(this));
       modules[filename]->Run();
     }
 

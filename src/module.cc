@@ -11,23 +11,34 @@
 namespace purr {
   static void noop(const v8::FunctionCallbackInfo<v8::Value>&) {}
 
-  void Module::ExportsGetter(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
-    v8::Local<v8::Value> exports = Game::Instance()->GetModuleFromRoot(info.Holder())->GetExports();
-    info.GetReturnValue().Set(exports);
+  void Module::ExportsGetter(v8::Local<v8::Name> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+    Module * module = static_cast<Module *>(v8::Local<v8::External>::Cast(
+      info.Data()->ToObject()->GetInternalField(0)
+    )->Value());
+
+    info.GetReturnValue().Set(module->GetExports());
   }
 
-  void Module::ExportsSetter(v8::Local<v8::String > property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void> &info) {
-    Module * module = Game::Instance()->GetModuleFromRoot(info.Holder());
+  void Module::ExportsSetter(v8::Local<v8::Name> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void> &info) {
+    Module * module = static_cast<Module *>(v8::Local<v8::External>::Cast(
+      info.Data()->ToObject()->GetInternalField(0)
+    )->Value());
+
     module->exports.Reset(module->isolate, value);
   }
 
-  void Module::ModuleGetter(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
-    v8::Local<v8::Object> module = info.Holder();
-    info.GetReturnValue().Set(module);
+  void Module::ModuleGetter(v8::Local<v8::Name> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+    Module * module = static_cast<Module *>(v8::Local<v8::External>::Cast(
+      info.Data()->ToObject()->GetInternalField(0)
+    )->Value());
+
+    info.GetReturnValue().Set(v8::Local<v8::Object>::New(module->isolate, module->root));
   }
 
   void Module::Require(const v8::FunctionCallbackInfo<v8::Value>& info) {
-    Module * module = Game::Instance()->GetModuleFromRoot(info.Holder());
+    Module * module = static_cast<Module *>(v8::Local<v8::External>::Cast(
+      info.Data()->ToObject()->GetInternalField(0)
+    )->Value());
 
     if (info.Length() == 0) {
       std::cerr << "Error: require() called without any arguments";
@@ -44,7 +55,7 @@ namespace purr {
     filesystem::path fullPath(dirPath / relativePath);
 
     if (fullPath.is_file()) {
-      Module * requiredModule = Game::Instance()->SaveModule(fullPath.make_absolute().str());
+      Module * requiredModule = module->registry->Save(fullPath.make_absolute().str());
       info.GetReturnValue().Set(requiredModule->GetExports());
       return;
     }
@@ -52,7 +63,7 @@ namespace purr {
     filesystem::path fullPathJS(fullPath.str() + ".js");
 
     if (fullPathJS.is_file()) {
-      Module * requiredModule = Game::Instance()->SaveModule(fullPathJS.make_absolute().str());
+      Module * requiredModule = module->registry->Save(fullPathJS.make_absolute().str());
       info.GetReturnValue().Set(requiredModule->GetExports());
       return;
     }
@@ -61,31 +72,56 @@ namespace purr {
     filesystem::path fullPathIndexJS(fullPath / indexName);
 
     if (fullPathIndexJS.is_file()) {
-      Module * requiredModule = Game::Instance()->SaveModule(fullPathIndexJS.make_absolute().str());
+      Module * requiredModule = module->registry->Save(fullPathIndexJS.make_absolute().str());
       info.GetReturnValue().Set(requiredModule->GetExports());
       return;
     }
   }
 
-  Module::Module(v8::Isolate * isolate, std::string filename) : isolate(isolate), filename(filename) {
+  Module::Module(
+    v8::Isolate * isolate,
+    std::string filename,
+    Registry<Module> * registry
+  ) : isolate(isolate), filename(filename), registry(registry) {
     v8::Local<v8::ObjectTemplate> moduleTemplate = v8::ObjectTemplate::New(isolate);
-
-    moduleTemplate->SetAccessor(v8::String::NewFromUtf8(isolate, "exports"), &ExportsGetter, &ExportsSetter);
-    moduleTemplate->SetAccessor(v8::String::NewFromUtf8(isolate, "module"), &ModuleGetter);
-    moduleTemplate->Set(v8::String::NewFromUtf8(isolate, "require"), v8::FunctionTemplate::New(isolate, &Require));
+    moduleTemplate->SetInternalFieldCount(1);
 
     context = v8::Context::New(isolate, NULL, moduleTemplate);
     v8::Context::Scope context_scope(context);
+    context->Global()->SetInternalField(0, v8::External::New(isolate, this));
 
-    v8::Local<v8::String> filenameUTF8 = v8::String::NewFromUtf8(isolate, filename.c_str());
-    v8::Local<v8::String> dirnameUTF8 = v8::String::NewFromUtf8(isolate,GetDir().c_str());
-    v8::Local<v8::Object> localExports = v8::Object::New(isolate);
+    if (
+      context->Global()->SetAccessor(
+        context,
+        v8::String::NewFromUtf8(isolate, "exports"),
+        ExportsGetter,
+        ExportsSetter,
+        context->Global()
+      ).ToChecked() &&
+      context->Global()->SetAccessor(
+        context,
+        v8::String::NewFromUtf8(isolate, "module"),
+        ModuleGetter,
+        0,
+        context->Global()
+      ).ToChecked() &&
+      context->Global()->Set(
+        context,
+        v8::String::NewFromUtf8(isolate, "require"),
+        v8::Function::New(context, Require, context->Global()).ToLocalChecked()
+      ).ToChecked()
+    ) {
+      v8::Local<v8::String> filenameUTF8 = v8::String::NewFromUtf8(isolate, filename.c_str());
+      v8::Local<v8::String> dirnameUTF8 = v8::String::NewFromUtf8(isolate,GetDir().c_str());
+      v8::Local<v8::Object> localExports = v8::Object::New(isolate);
 
-    exports.Reset(isolate, localExports);
-    context->Global()->Set(v8::String::NewFromUtf8(isolate, "__filename__"), filenameUTF8);
-    context->Global()->Set(v8::String::NewFromUtf8(isolate, "__dirname__"), dirnameUTF8);
+      exports.Reset(isolate, localExports);
+      root.Reset(isolate, context->Global());
+      context->Global()->Set(v8::String::NewFromUtf8(isolate, "__filename__"), filenameUTF8);
+      context->Global()->Set(v8::String::NewFromUtf8(isolate, "__dirname__"), dirnameUTF8);
 
-    Game::Instance()->FeedContextAPI(context);
+      Game::Instance()->FeedContextAPI(context);
+    }
   }
 
   void Module::Run() {

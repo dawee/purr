@@ -10,11 +10,12 @@
 #include "job.h"
 #include "module.h"
 #include "queue.h"
+#include "registry.h"
 #include "worker.h"
 
 namespace purr {
 
-  class Game : public Worker {
+  class Game : public Worker, public Registry<Module> {
     private:
       static Game * instance;
 
@@ -37,8 +38,8 @@ namespace purr {
       static int RunRenderingLoop(void *);
       static int RunJobsLoop(void *);
 
-      Module * GetModuleFromRoot(v8::Local<v8::Object>);
-      Module * SaveModule(std::string);
+      Module * GetFromHolder(v8::Local<v8::Object>);
+      Module * Save(std::string);
       SDLDisplay * Display();
       void FeedContextAPI(v8::Local<v8::Context>);
       void RunLoop();
