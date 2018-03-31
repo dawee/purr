@@ -26,7 +26,7 @@ namespace purr {
       v8::Isolate::Scope isolate_scope(engine->isolate);
       v8::HandleScope handle_scope(engine->isolate);
 
-      engine->api = new API(engine->isolate, engine->display, static_cast<Worker *>(engine));
+      engine->graphics = new Graphics(engine->isolate, engine->display, static_cast<Worker *>(engine));
       engine->console = new Console(engine->isolate);
       engine->main = engine->Save(engine->mainFilename);
 
@@ -81,7 +81,7 @@ namespace purr {
     if (modules.count(filename) == 0) {
       modules[filename] = new Module(isolate, filename, static_cast<Registry<Module> *>(this));
 
-      modules[filename]->Feed("purr", static_cast<Feeder *>(api));
+      modules[filename]->Feed("graphics", static_cast<Feeder *>(graphics));
       modules[filename]->Feed("console", static_cast<Feeder *>(console));
       modules[filename]->Run();
     }

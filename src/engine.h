@@ -4,7 +4,7 @@
 #include <map>
 #include <SDL2/SDL.h>
 #include <v8/v8.h>
-#include "api.h"
+#include "graphics.h"
 #include "display.h"
 #include "console.h"
 #include "job.h"
@@ -18,7 +18,7 @@ namespace purr {
   class Engine : public Worker, public Registry<Module> {
     private:
       v8::Isolate * isolate;
-      API * api;
+      Graphics * graphics;
       Console * console;
       SDLDisplay * display;
       std::map<std::string, Module *> modules;
