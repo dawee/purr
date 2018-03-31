@@ -130,11 +130,14 @@ namespace purr {
       int x = info.Length() > 1 ? info[1]->Int32Value() : 0;
       int y = info.Length() > 2 ? info[2]->Int32Value() : 0;
 
-      apiTexture->texture->Draw(Game::Instance()->Display(), x, y);
+      apiTexture->texture->Draw(apiTexture->api->display, x, y);
     }
   }
 
-  API::API(v8::Isolate * isolate, Worker * worker) : Feeder::Feeder(isolate), worker(worker) {
+  API::API(
+    v8::Isolate * isolate,
+    SDLDisplay * display, Worker * worker
+  ) : Feeder::Feeder(isolate), display(display), worker(worker) {
     v8::Context::Scope context_scope(context);
 
     v8::Local<v8::ObjectTemplate> apiTemplate = v8::ObjectTemplate::New(isolate);

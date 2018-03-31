@@ -2,6 +2,8 @@
 #define PURR_API_H
 
 #include <v8/v8.h>
+
+#include "display.h"
 #include "feeder.h"
 #include "worker.h"
 
@@ -14,6 +16,7 @@ namespace purr {
 
   class API : public Feeder {
     private:
+      SDLDisplay * display;
       Worker * worker;
 
       static APITexture * getTextureFromValue(v8::Local<v8::Value>, const char *);
@@ -25,7 +28,7 @@ namespace purr {
       static void drawTexture(const v8::FunctionCallbackInfo<v8::Value>&);
 
     public:
-      API(v8::Isolate *, Worker *);
+      API(v8::Isolate *, SDLDisplay *, Worker *);
   };
 
   class APITexture {
