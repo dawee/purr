@@ -27,7 +27,7 @@ namespace purr {
     {
       v8::Isolate::Scope isolate_scope(game->isolate);
       v8::HandleScope handle_scope(game->isolate);
-      game->api = new API(game->isolate);
+      game->api = new API(game->isolate, static_cast<Worker *>(game));
       game->console = new Console(game->isolate);
       game->main = game->SaveModule(game->mainFilename);
 

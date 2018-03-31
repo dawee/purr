@@ -10,10 +10,11 @@
 #include "job.h"
 #include "module.h"
 #include "queue.h"
+#include "worker.h"
 
 namespace purr {
 
-  class Game {
+  class Game : public Worker {
     private:
       static Game * instance;
 
