@@ -5,7 +5,7 @@
 #include <filesystem/resolver.h>
 
 #include "module.h"
-#include "game.h"
+#include "engine.h"
 #include "util.h"
 
 namespace purr {

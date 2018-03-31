@@ -2,7 +2,7 @@
 #include <filesystem/path.h>
 #include <filesystem/resolver.h>
 
-#include "game.h"
+#include "engine.h"
 
 int main(int argc, char * argv[]) {
   if (argc != 2) {
@@ -11,8 +11,8 @@ int main(int argc, char * argv[]) {
   }
 
   filesystem::path filePath(argv[1]);
-  purr::Game game(filePath.make_absolute().str());
+  purr::Engine engine(filePath.make_absolute().str());
 
-  game.RunLoop();
+  engine.RunLoop();
   return 0;
 }

@@ -15,7 +15,7 @@
 
 namespace purr {
 
-  class Game : public Worker, public Registry<Module> {
+  class Engine : public Worker, public Registry<Module> {
     private:
       v8::Isolate * isolate;
       API * api;
@@ -36,7 +36,7 @@ namespace purr {
       void RunLoop();
       void PushJob(Job *);
 
-      Game(std::string);
+      Engine(std::string);
   };
 
 }
