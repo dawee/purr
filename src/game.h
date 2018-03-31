@@ -27,13 +27,12 @@ namespace purr {
       bool eventLoopActivated;
       Queue<Job> jobsQueue;
 
-    public:
-      static int RunRenderingLoop(void *);
-      static int RunJobsLoop(void *);
+      static int runRenderingLoop(void *);
+      static int runJobsLoop(void *);
 
+    public:
       Module * GetFromHolder(v8::Local<v8::Object>);
       Module * Save(std::string);
-      SDLDisplay * Display();
       void RunLoop();
       void PushJob(Job *);
 

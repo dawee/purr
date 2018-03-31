@@ -19,16 +19,16 @@ namespace purr {
       v8::Local<v8::Context> context;
       Registry<Module> * registry;
 
-      v8::Local<v8::Value> GetExports();
-      std::string GetDir();
+      v8::Local<v8::Value> localExports();
+      std::string dir();
       v8::Local<v8::Function> getExportedFunction(const char *);
+      static void getExports(v8::Local<v8::Name>, const v8::PropertyCallbackInfo<v8::Value>&);
+      static void setExports(v8::Local<v8::Name>, v8::Local<v8::Value>, const v8::PropertyCallbackInfo<void>&);
+      static void getModule(v8::Local<v8::Name>, const v8::PropertyCallbackInfo<v8::Value>&);
+      static void require(const v8::FunctionCallbackInfo<v8::Value>&);
 
     public:
       static std::string GetFilenameFromRoot(v8::Local<v8::Object>);
-      static void ExportsGetter(v8::Local<v8::Name>, const v8::PropertyCallbackInfo<v8::Value>&);
-      static void ExportsSetter(v8::Local<v8::Name>, v8::Local<v8::Value>, const v8::PropertyCallbackInfo<void>&);
-      static void ModuleGetter(v8::Local<v8::Name>, const v8::PropertyCallbackInfo<v8::Value>&);
-      static void Require(const v8::FunctionCallbackInfo<v8::Value>&);
 
       void Run();
       void Feed(const char *, Feeder *);

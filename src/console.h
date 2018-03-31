@@ -6,9 +6,10 @@
 
 namespace purr {
   class Console : public Feeder {
-    public:
+    private:
       static void Log(const v8::FunctionCallbackInfo<v8::Value>&);
 
+    public:
       Console(v8::Isolate *);
   };
 }

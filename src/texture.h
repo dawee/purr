@@ -18,9 +18,9 @@ namespace purr {
       int width;
       int height;
 
-    public:
       static int LoadTexture(void *);
 
+    public:
       void Load(SDLDisplay * display);
       bool IsLoaded();
       void Draw(SDLDisplay *, int, int);

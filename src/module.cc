@@ -11,15 +11,15 @@
 namespace purr {
   static void noop(const v8::FunctionCallbackInfo<v8::Value>&) {}
 
-  void Module::ExportsGetter(v8::Local<v8::Name> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+  void Module::getExports(v8::Local<v8::Name> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
     Module * module = static_cast<Module *>(v8::Local<v8::External>::Cast(
       info.Data()->ToObject()->GetInternalField(0)
     )->Value());
 
-    info.GetReturnValue().Set(module->GetExports());
+    info.GetReturnValue().Set(module->localExports());
   }
 
-  void Module::ExportsSetter(v8::Local<v8::Name> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void> &info) {
+  void Module::setExports(v8::Local<v8::Name> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void> &info) {
     Module * module = static_cast<Module *>(v8::Local<v8::External>::Cast(
       info.Data()->ToObject()->GetInternalField(0)
     )->Value());
@@ -27,7 +27,7 @@ namespace purr {
     module->exports.Reset(module->isolate, value);
   }
 
-  void Module::ModuleGetter(v8::Local<v8::Name> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+  void Module::getModule(v8::Local<v8::Name> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
     Module * module = static_cast<Module *>(v8::Local<v8::External>::Cast(
       info.Data()->ToObject()->GetInternalField(0)
     )->Value());
@@ -35,7 +35,7 @@ namespace purr {
     info.GetReturnValue().Set(v8::Local<v8::Object>::New(module->isolate, module->root));
   }
 
-  void Module::Require(const v8::FunctionCallbackInfo<v8::Value>& info) {
+  void Module::require(const v8::FunctionCallbackInfo<v8::Value>& info) {
     Module * module = static_cast<Module *>(v8::Local<v8::External>::Cast(
       info.Data()->ToObject()->GetInternalField(0)
     )->Value());
@@ -51,12 +51,12 @@ namespace purr {
     }
 
     std::string relativePath = ValueToSTDString(info[0]);
-    filesystem::path dirPath(module->GetDir());
+    filesystem::path dirPath(module->dir());
     filesystem::path fullPath(dirPath / relativePath);
 
     if (fullPath.is_file()) {
       Module * requiredModule = module->registry->Save(fullPath.make_absolute().str());
-      info.GetReturnValue().Set(requiredModule->GetExports());
+      info.GetReturnValue().Set(requiredModule->localExports());
       return;
     }
 
@@ -64,7 +64,7 @@ namespace purr {
 
     if (fullPathJS.is_file()) {
       Module * requiredModule = module->registry->Save(fullPathJS.make_absolute().str());
-      info.GetReturnValue().Set(requiredModule->GetExports());
+      info.GetReturnValue().Set(requiredModule->localExports());
       return;
     }
 
@@ -73,7 +73,7 @@ namespace purr {
 
     if (fullPathIndexJS.is_file()) {
       Module * requiredModule = module->registry->Save(fullPathIndexJS.make_absolute().str());
-      info.GetReturnValue().Set(requiredModule->GetExports());
+      info.GetReturnValue().Set(requiredModule->localExports());
       return;
     }
   }
@@ -94,25 +94,25 @@ namespace purr {
       context->Global()->SetAccessor(
         context,
         v8::String::NewFromUtf8(isolate, "exports"),
-        ExportsGetter,
-        ExportsSetter,
+        getExports,
+        setExports,
         context->Global()
       ).ToChecked() &&
       context->Global()->SetAccessor(
         context,
         v8::String::NewFromUtf8(isolate, "module"),
-        ModuleGetter,
+        getModule,
         0,
         context->Global()
       ).ToChecked() &&
       context->Global()->Set(
         context,
         v8::String::NewFromUtf8(isolate, "require"),
-        v8::Function::New(context, Require, context->Global()).ToLocalChecked()
+        v8::Function::New(context, require, context->Global()).ToLocalChecked()
       ).ToChecked()
     ) {
       v8::Local<v8::String> filenameUTF8 = v8::String::NewFromUtf8(isolate, filename.c_str());
-      v8::Local<v8::String> dirnameUTF8 = v8::String::NewFromUtf8(isolate,GetDir().c_str());
+      v8::Local<v8::String> dirnameUTF8 = v8::String::NewFromUtf8(isolate,dir().c_str());
       v8::Local<v8::Object> localExports = v8::Object::New(isolate);
 
       exports.Reset(isolate, localExports);
@@ -197,7 +197,7 @@ namespace purr {
     feeder->FeedObject(key, v8::Local<v8::Object>::New(isolate, root));
   }
 
-  v8::Local<v8::Value> Module::GetExports() {
+  v8::Local<v8::Value> Module::localExports() {
     return v8::Local<v8::Value>::New(isolate, exports);
   }
 
@@ -207,13 +207,13 @@ namespace purr {
     return ValueToSTDString(filename);
   }
 
-  std::string Module::GetDir() {
+  std::string Module::dir() {
     filesystem::path filePath(filename);
     return filePath.parent_path().str();
   }
 
   std::string Module::ResolveRelativePath(const char * relativePathStr) {
-    filesystem::path dirPath(GetDir());
+    filesystem::path dirPath(dir());
     filesystem::path relativePath(relativePathStr);
 
     return (dirPath / relativePath).make_absolute().str();

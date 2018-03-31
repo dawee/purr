@@ -7,7 +7,7 @@
 #define FPS 60
 
 namespace purr {
-  int Game::RunRenderingLoop(void * gameInstancePtr) {
+  int Game::runRenderingLoop(void * gameInstancePtr) {
     Game * game = static_cast<Game *>(gameInstancePtr);
     unsigned int currentUpdateTime = SDL_GetTicks();
     unsigned int lastUpdateTime = SDL_GetTicks();
@@ -50,7 +50,7 @@ namespace purr {
     return 0;
   }
 
-  int Game::RunJobsLoop(void * gameInstancePtr) {
+  int Game::runJobsLoop(void * gameInstancePtr) {
     Game * game = static_cast<Game *>(gameInstancePtr);
 
     SDL_SetThreadPriority(SDL_THREAD_PRIORITY_LOW);
@@ -89,10 +89,6 @@ namespace purr {
     return modules[filename];
   }
 
-  SDLDisplay * Game::Display() {
-    return display;
-  }
-
   void Game::RunLoop() {
     void * gameInstancePtr = static_cast<void *>(this);
     unsigned int quitGameRequestTime = 0;
@@ -102,13 +98,13 @@ namespace purr {
     eventLoopActivated = true;
 
     SDL_Thread * renderingThread = SDL_CreateThread(
-      Game::RunRenderingLoop,
+      Game::runRenderingLoop,
       "rendering-loop",
       gameInstancePtr
     );
 
     SDL_Thread * jobsThread = SDL_CreateThread(
-      Game::RunJobsLoop,
+      Game::runJobsLoop,
       "jobs-loop",
       gameInstancePtr
     );
