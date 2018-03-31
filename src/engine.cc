@@ -4,14 +4,14 @@
 #include "queue.h"
 #include "engine.h"
 
-#define FPS 60
+static int const FPS = 60;
+static int const FRAME_DURATION = 1000 / FPS;
 
 namespace purr {
   int Engine::runRenderingLoop(void * engineInstancePtr) {
     Engine * engine = static_cast<Engine *>(engineInstancePtr);
     unsigned int currentUpdateTime = SDL_GetTicks();
     unsigned int lastUpdateTime = SDL_GetTicks();
-    unsigned int fixedDeltaTime = 1000 / FPS;
 
     SDL_SetThreadPriority(SDL_THREAD_PRIORITY_HIGH);
 
@@ -33,8 +33,8 @@ namespace purr {
       while (engine->eventLoopActivated) {
         currentUpdateTime = SDL_GetTicks();
 
-        if (currentUpdateTime - lastUpdateTime < fixedDeltaTime) {
-          SDL_Delay(fixedDeltaTime - (currentUpdateTime - lastUpdateTime));
+        if (currentUpdateTime - lastUpdateTime < FRAME_DURATION) {
+          SDL_Delay(FRAME_DURATION - (currentUpdateTime - lastUpdateTime));
           currentUpdateTime = SDL_GetTicks();
         }
 
@@ -62,7 +62,7 @@ namespace purr {
         job->Run();
         delete job;
       } else {
-        SDL_Delay(2000 / FPS);
+        SDL_Delay(2 * FRAME_DURATION);
       }
     }
 
@@ -101,7 +101,7 @@ namespace purr {
     SDL_Event event;
 
     while (eventLoopActivated) {
-      if (quitEngineRequestTime > 0 && (SDL_GetTicks() - quitEngineRequestTime) > 2000 / FPS) {
+      if (quitEngineRequestTime > 0 && (SDL_GetTicks() - quitEngineRequestTime) > (2 * FRAME_DURATION)) {
         eventLoopActivated = false;
       }
 
