@@ -17,8 +17,6 @@ namespace purr {
 
   class Game : public Worker, public Registry<Module> {
     private:
-      static Game * instance;
-
       v8::Isolate * isolate;
       API * api;
       Console * console;
@@ -29,21 +27,17 @@ namespace purr {
       bool eventLoopActivated;
       Queue<Job> jobsQueue;
 
-      Game(std::string);
-
     public:
-      static Game * Instance();
-      static Game * CreateInstance(std::string mainFilename);
-      static void DeleteInstance();
       static int RunRenderingLoop(void *);
       static int RunJobsLoop(void *);
 
       Module * GetFromHolder(v8::Local<v8::Object>);
       Module * Save(std::string);
       SDLDisplay * Display();
-      void FeedContextAPI(v8::Local<v8::Context>);
       void RunLoop();
       void PushJob(Job *);
+
+      Game(std::string);
   };
 
 }

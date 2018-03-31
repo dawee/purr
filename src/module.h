@@ -4,6 +4,7 @@
 #include <string>
 #include <v8/v8.h>
 
+#include "feeder.h"
 #include "registry.h"
 
 namespace purr {
@@ -30,6 +31,7 @@ namespace purr {
       static void Require(const v8::FunctionCallbackInfo<v8::Value>&);
 
       void Run();
+      void Feed(const char *, Feeder *);
       void CallExportedFunction(const char *);
       void CallExportedFunction(const char *, unsigned);
       std::string ResolveRelativePath(const char *);

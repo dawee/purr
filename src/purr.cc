@@ -11,9 +11,8 @@ int main(int argc, char * argv[]) {
   }
 
   filesystem::path filePath(argv[1]);
-  std::string mainFilename = filePath.make_absolute().str();
+  purr::Game game(filePath.make_absolute().str());
 
-  purr::Game::CreateInstance(mainFilename)->RunLoop();
-  purr::Game::DeleteInstance();
+  game.RunLoop();
   return 0;
 }

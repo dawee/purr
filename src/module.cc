@@ -119,8 +119,6 @@ namespace purr {
       root.Reset(isolate, context->Global());
       context->Global()->Set(v8::String::NewFromUtf8(isolate, "__filename__"), filenameUTF8);
       context->Global()->Set(v8::String::NewFromUtf8(isolate, "__dirname__"), dirnameUTF8);
-
-      Game::Instance()->FeedContextAPI(context);
     }
   }
 
@@ -191,6 +189,12 @@ namespace purr {
     args[0] = v8::Number::New(isolate, param);
 
     func->Call(func, 1, args);
+  }
+
+  void Module::Feed(const char * key, Feeder * feeder) {
+    v8::Context::Scope context_scope(context);
+
+    feeder->FeedObject(key, v8::Local<v8::Object>::New(isolate, root));
   }
 
   v8::Local<v8::Value> Module::GetExports() {

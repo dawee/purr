@@ -7,8 +7,6 @@
 #define FPS 60
 
 namespace purr {
-  Game * Game::instance = NULL;
-
   int Game::RunRenderingLoop(void * gameInstancePtr) {
     Game * game = static_cast<Game *>(gameInstancePtr);
     unsigned int currentUpdateTime = SDL_GetTicks();
@@ -73,18 +71,6 @@ namespace purr {
 
   Game::Game(std::string mainFilename) : mainFilename(mainFilename) {}
 
-  Game * Game::Instance() {
-    return instance;
-  }
-
-  Game * Game::CreateInstance(std::string mainFilename) {
-    if (instance == nullptr) {
-      instance = new Game(mainFilename);
-    }
-
-    return instance;
-  }
-
   Module * Game::GetFromHolder(v8::Local<v8::Object> root) {
     std::string filename = Module::GetFilenameFromRoot(root);
 
@@ -94,25 +80,17 @@ namespace purr {
   Module * Game::Save(std::string filename) {
     if (modules.count(filename) == 0) {
       modules[filename] = new Module(isolate, filename, static_cast<Registry<Module> *>(this));
+
+      modules[filename]->Feed("purr", static_cast<Feeder *>(api));
+      modules[filename]->Feed("console", static_cast<Feeder *>(console));
       modules[filename]->Run();
     }
 
     return modules[filename];
   }
 
-  void Game::FeedContextAPI(v8::Local<v8::Context> context) {
-    v8::Local<v8::Object> object = context->Global();
-
-    api->FeedObject("purr", object);
-    console->FeedObject("console", object);
-  }
-
   SDLDisplay * Game::Display() {
     return display;
-  }
-
-  void Game::DeleteInstance() {
-    delete instance;
   }
 
   void Game::RunLoop() {
