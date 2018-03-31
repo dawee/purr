@@ -7,10 +7,13 @@ namespace purr {
   NoopJob::NoopJob() : Job(JobType::NOOP) {}
   void NoopJob::Run() {}
 
-  LoadTextureJob::LoadTextureJob(Texture * texture) : Job(JobType::LOAD_TEXTURE), texture(texture) {}
+  LoadTextureJob::LoadTextureJob(
+    SDLDisplay * display,
+    Texture * texture
+  ) : Job(JobType::LOAD_TEXTURE), display(display), texture(texture) {}
 
   void LoadTextureJob::Run() {
-    texture->Load();
+    texture->Load(display);
   }
 
   DestroyTextureJob::DestroyTextureJob(Texture * texture) : Job(JobType::DESTROY_TEXTURE), texture(texture) {}

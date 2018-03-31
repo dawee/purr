@@ -1,6 +1,7 @@
 #ifndef PURR_JOB_H
 #define PURR_JOB_H
 
+#include "display.h"
 #include "texture.h"
 
 namespace purr {
@@ -30,10 +31,11 @@ namespace purr {
 
   class LoadTextureJob : public Job {
     private:
+      SDLDisplay * display;
       Texture * texture;
 
     public:
-      LoadTextureJob(Texture *);
+      LoadTextureJob(SDLDisplay * display, Texture *);
       void Run();
   };
 

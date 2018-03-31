@@ -1,6 +1,7 @@
 #ifndef PURR_DISPLAY_H
 #define PURR_DISPLAY_H
 
+#include <string>
 #include <SDL2/SDL.h>
 
 namespace purr {

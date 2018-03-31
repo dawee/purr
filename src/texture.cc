@@ -22,10 +22,9 @@ namespace purr {
     }
   }
 
-  void Texture::Load() {
+  void Texture::Load(SDLDisplay * display) {
     if (SDL_LockMutex(mutex) == 0) {
       if (sdlTexture == nullptr) {
-        SDLDisplay * display = Game::Instance()->Display();
         SDL_Texture * sdlTexture = display->CreateSDLTextureFromImage(filename);
         SDL_QueryTexture(sdlTexture, &format, &access, &width, &height);
         this->sdlTexture = sdlTexture;

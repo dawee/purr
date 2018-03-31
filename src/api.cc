@@ -112,7 +112,7 @@ namespace purr {
     pTextureObject.SetWeak(apiTexture, onTextureObjectDestroyed, v8::WeakCallbackType::kParameter);
     pTextureObject.MarkIndependent();
 
-    LoadTextureJob * job = new LoadTextureJob(texture);
+    LoadTextureJob * job = new LoadTextureJob(api->display, texture);
 
     api->worker->PushJob(static_cast<Job *>(job));
     info.GetReturnValue().Set(textureObject);
