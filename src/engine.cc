@@ -94,21 +94,10 @@ namespace purr {
     unsigned int quitEngineRequestTime = 0;
 
     display = new SDLDisplay();
-
     eventLoopActivated = true;
 
-    SDL_Thread * renderingThread = SDL_CreateThread(
-      Engine::runRenderingLoop,
-      "rendering-loop",
-      engineInstancePtr
-    );
-
-    SDL_Thread * jobsThread = SDL_CreateThread(
-      Engine::runJobsLoop,
-      "jobs-loop",
-      engineInstancePtr
-    );
-
+    SDL_Thread * renderingThread = SDL_CreateThread(runRenderingLoop, "rendering-loop", engineInstancePtr);
+    SDL_Thread * jobsThread = SDL_CreateThread(runJobsLoop, "jobs-loop", engineInstancePtr);
     SDL_Event event;
 
     while (eventLoopActivated) {
