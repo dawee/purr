@@ -6,7 +6,8 @@
 
 namespace purr {
   enum EventType {
-    KEYDOWN
+    KEYDOWN,
+    KEYUP
   };
 
   class Event {
@@ -20,14 +21,26 @@ namespace purr {
       virtual v8::Local<v8::Object> ToJS(v8::Isolate *, v8::Local<v8::Context>) = 0;
   };
 
-  class KeyDownEvent : public Event {
-    private:
+  class KeyboardEvent : public Event {
+    protected:
       const char * key;
 
     public:
+      KeyboardEvent(SDL_Event& event);
+  };
+
+  class KeydownEvent : public KeyboardEvent {
+    public:
       v8::Local<v8::Object> ToJS(v8::Isolate *, v8::Local<v8::Context>);
 
-      KeyDownEvent(SDL_Event& event);
+      KeydownEvent(SDL_Event& event);
+  };
+
+  class KeyupEvent : public KeyboardEvent {
+    public:
+      v8::Local<v8::Object> ToJS(v8::Isolate *, v8::Local<v8::Context>);
+
+      KeyupEvent(SDL_Event& event);
   };
 }
 

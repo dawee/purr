@@ -11,6 +11,10 @@ const dispatch = event => {
   if (type === 'keydown' && key === 'Right') {
     moving = true;
   }
+
+  if (type === 'keyup' && key === 'Right') {
+    moving = false;
+  }
 };
 
 const update = dt => {
