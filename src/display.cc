@@ -29,7 +29,7 @@ namespace purr {
       return;
     }
 
-    SDL_Surface * surface = SDL_CreateRGBSurface(0, SCREEN_WIDTH, SCREEN_HEIGHT, 32, 0, 0, 0, 0);
+    SDL_Surface * surface = SDL_CreateRGBSurface(0, 1, 1, 32, 0, 0, 0, 0);
 
     if (surface == nullptr){
       SDL_DestroyRenderer(renderer);
