@@ -6,6 +6,8 @@ static const char * STR_KEYUP = "keyup";
 static const char * STR_KEY = "key";
 
 namespace purr {
+  Event::Event() {}
+
   Event * Event::FromSDLEvent(SDL_Event& sdlEvent) {
     switch (sdlEvent.type) {
       case SDL_KEYDOWN:
@@ -17,21 +19,9 @@ namespace purr {
     };
   }
 
-  void Event::Destroy(Event * event) {
-    switch (event->type) {
-      case EventType::KEYDOWN: {
-        KeydownEvent * keydownEvent = static_cast<KeydownEvent *>(event);
-        delete keydownEvent;
-        break;
-      }
-      case EventType::KEYUP: {
-        KeyupEvent * keyupEvent = static_cast<KeyupEvent *>(event);
-        delete keyupEvent;
-        break;
-      }
-      default:
-        break;
-    };
+  v8::Local<v8::Object> Event::ToJS(v8::Isolate * isolate, v8::Local<v8::Context> context) {
+    v8::Context::Scope context_scope(context);
+    return v8::Object::New(isolate);
   }
 
   /*

@@ -14,11 +14,13 @@ namespace purr {
     protected:
       EventType type;
 
+      Event();
+
     public:
       static Event * FromSDLEvent(SDL_Event& event);
       static void Destroy(Event *);
 
-      virtual v8::Local<v8::Object> ToJS(v8::Isolate *, v8::Local<v8::Context>) = 0;
+      virtual v8::Local<v8::Object> ToJS(v8::Isolate *, v8::Local<v8::Context>);
   };
 
   class KeyboardEvent : public Event {

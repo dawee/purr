@@ -39,7 +39,7 @@ namespace purr {
 
           if (event != nullptr) {
             engine->main->Dispatch(*event);
-            Event::Destroy(event);
+            delete event;
           }
         } while (event != nullptr);
 
