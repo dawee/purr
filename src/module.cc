@@ -204,8 +204,11 @@ namespace purr {
     v8::MaybeLocal<v8::Function> maybeFunc = getExportedFunction("dispatch");
 
     if (!maybeFunc.IsEmpty()) {
+      v8::Handle<v8::Value> args[1];
+
+      args[0] = event.ToJS(isolate, context);
       v8::Local<v8::Function> func = maybeFunc.ToLocalChecked();
-      func->Call(func, 0, NULL);
+      func->Call(func, 1, args);
     }
   }
 
@@ -222,11 +225,11 @@ namespace purr {
   void MainModule::Update(unsigned dt) {
     v8::Context::Scope context_scope(context);
     v8::MaybeLocal<v8::Function> maybeFunc = getExportedFunction("update");
-    v8::Handle<v8::Value> args[1];
-
-    args[0] = v8::Number::New(isolate, dt);
 
     if (!maybeFunc.IsEmpty()) {
+      v8::Handle<v8::Value> args[1];
+
+      args[0] = v8::Number::New(isolate, dt);
       v8::Local<v8::Function> func = maybeFunc.ToLocalChecked();
       func->Call(func, 1, args);
     }

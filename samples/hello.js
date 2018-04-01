@@ -3,11 +3,20 @@ const {updateX} = require('./update');
 const mallow = graphics.loadTexture(`${__dirname__}/asset/mallow.png`);
 
 let x = 0;
+let moving = false;
 
-const dispatch = () => {};
+const dispatch = event => {
+  const {type, key} = event;
+
+  if (type === 'keydown' && key === 'Right') {
+    moving = true;
+  }
+};
 
 const update = dt => {
-  x = updateX(dt, x);
+  if (moving) {
+    x = updateX(dt, x);
+  }
 };
 
 const draw = () => graphics.drawTexture(mallow, x, 0);

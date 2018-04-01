@@ -39,7 +39,7 @@ namespace purr {
 
           if (event != nullptr) {
             engine->main->Dispatch(*event);
-            delete event;
+            Event::Destroy(event);
           }
         } while (event != nullptr);
 
@@ -115,9 +115,11 @@ namespace purr {
       }
 
       while (SDL_PollEvent(&sdlEvent) != 0) {
-        Event * event = new Event(sdlEvent);
+        Event * event = Event::FromSDLEvent(sdlEvent);
 
-        eventsQueue.Push(event);
+        if (event != nullptr) {
+          eventsQueue.Push(event);
+        }
 
         if (sdlEvent.type == SDL_QUIT || (sdlEvent.type == SDL_WINDOWEVENT && sdlEvent.window.event == SDL_WINDOWEVENT_CLOSE)) {
           display->Hide();
