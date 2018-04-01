@@ -22,7 +22,7 @@ namespace purr {
       Console * console;
       SDLDisplay * display;
       std::map<std::string, Module *> modules;
-      Module * main;
+      MainModule * main;
       std::string mainFilename;
       bool eventLoopActivated;
       Queue<Job> jobsQueue;

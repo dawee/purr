@@ -174,23 +174,6 @@ namespace purr {
     return v8::Local<v8::Function>::Cast(field);
   }
 
-  void Module::CallExportedFunction(const char * name) {
-    v8::Context::Scope context_scope(context);
-    v8::Local<v8::Function> func = getExportedFunction(name);
-
-    func->Call(func, 0, NULL);
-  }
-
-  void Module::CallExportedFunction(const char * name, unsigned param) {
-    v8::Context::Scope context_scope(context);
-    v8::Local<v8::Function> func = getExportedFunction(name);
-    v8::Handle<v8::Value> args[1];
-
-    args[0] = v8::Number::New(isolate, param);
-
-    func->Call(func, 1, args);
-  }
-
   void Module::Feed(const char * key, Feeder * feeder) {
     v8::Context::Scope context_scope(context);
 
@@ -217,5 +200,22 @@ namespace purr {
     filesystem::path relativePath(relativePathStr);
 
     return (dirPath / relativePath).make_absolute().str();
+  }
+
+  void MainModule::Draw() {
+    v8::Context::Scope context_scope(context);
+    v8::Local<v8::Function> func = getExportedFunction("draw");
+
+    func->Call(func, 0, NULL);
+  }
+
+  void MainModule::Update(unsigned dt) {
+    v8::Context::Scope context_scope(context);
+    v8::Local<v8::Function> func = getExportedFunction("update");
+    v8::Handle<v8::Value> args[1];
+
+    args[0] = v8::Number::New(isolate, dt);
+
+    func->Call(func, 1, args);
   }
 }

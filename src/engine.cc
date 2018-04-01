@@ -28,7 +28,7 @@ namespace purr {
 
       engine->graphics = new Graphics(engine->isolate, engine->display, static_cast<Worker *>(engine));
       engine->console = new Console(engine->isolate);
-      engine->main = engine->Save(engine->mainFilename);
+      engine->main = static_cast<MainModule *>(engine->Save(engine->mainFilename));
 
       while (engine->eventLoopActivated) {
         currentUpdateTime = SDL_GetTicks();
@@ -38,10 +38,11 @@ namespace purr {
           currentUpdateTime = SDL_GetTicks();
         }
 
-        engine->main->CallExportedFunction("update", currentUpdateTime - lastUpdateTime);
+        engine->main->Update(currentUpdateTime - lastUpdateTime);
         engine->display->Clear();
-        engine->main->CallExportedFunction("draw");
+        engine->main->Draw();
         engine->display->Render();
+
         lastUpdateTime = currentUpdateTime;
       }
     }
