@@ -1,6 +1,7 @@
 #include <v8/v8.h>
 #include <v8/libplatform/libplatform.h>
 
+#include "event.h"
 #include "queue.h"
 #include "engine.h"
 
@@ -31,6 +32,17 @@ namespace purr {
       engine->main = static_cast<MainModule *>(engine->Save(engine->mainFilename));
 
       while (engine->eventLoopActivated) {
+        Event * event;
+
+        do {
+          event = engine->eventsQueue.PullWithoutWaiting();
+
+          if (event != nullptr) {
+            engine->main->Dispatch(*event);
+            delete event;
+          }
+        } while (event != nullptr);
+
         currentUpdateTime = SDL_GetTicks();
 
         if (currentUpdateTime - lastUpdateTime < FRAME_DURATION) {
@@ -70,7 +82,9 @@ namespace purr {
     return 0;
   }
 
-  Engine::Engine(std::string mainFilename) : mainFilename(mainFilename) {}
+  Engine::Engine(std::string mainFilename) : mainFilename(mainFilename) {
+    main = nullptr;
+  }
 
   Module * Engine::Save(std::string filename) {
     if (modules.count(filename) == 0) {
@@ -93,15 +107,19 @@ namespace purr {
 
     SDL_Thread * renderingThread = SDL_CreateThread(runRenderingLoop, "rendering-loop", engineInstancePtr);
     SDL_Thread * jobsThread = SDL_CreateThread(runJobsLoop, "jobs-loop", engineInstancePtr);
-    SDL_Event event;
+    SDL_Event sdlEvent;
 
     while (eventLoopActivated) {
       if (quitEngineRequestTime > 0 && (SDL_GetTicks() - quitEngineRequestTime) > (2 * FRAME_DURATION)) {
         eventLoopActivated = false;
       }
 
-      while (SDL_PollEvent(&event) != 0) {
-        if (event.type == SDL_QUIT || (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE)) {
+      while (SDL_PollEvent(&sdlEvent) != 0) {
+        Event * event = new Event(sdlEvent);
+
+        eventsQueue.Push(event);
+
+        if (sdlEvent.type == SDL_QUIT || (sdlEvent.type == SDL_WINDOWEVENT && sdlEvent.window.event == SDL_WINDOWEVENT_CLOSE)) {
           display->Hide();
           quitEngineRequestTime = SDL_GetTicks();
         }

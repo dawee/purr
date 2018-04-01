@@ -15,8 +15,11 @@ namespace purr {
         T * item = nullptr;
 
         if (SDL_LockMutex(mutex) == 0) {
-          item = q.front();
-          q.pop();
+          if (q.size() > 0) {
+            item = q.front();
+            q.pop();
+          }
+
           SDL_UnlockMutex(mutex);
         }
 
@@ -43,6 +46,11 @@ namespace purr {
 
       T * Pull() {
         SDL_SemWait(sem);
+        return pop();
+      }
+
+      T * PullWithoutWaiting() {
+        SDL_SemTryWait(sem);
         return pop();
       }
   };

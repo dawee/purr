@@ -26,6 +26,7 @@ namespace purr {
       std::string mainFilename;
       bool eventLoopActivated;
       Queue<Job> jobsQueue;
+      Queue<Event> eventsQueue;
 
       static int runRenderingLoop(void *);
       static int runJobsLoop(void *);

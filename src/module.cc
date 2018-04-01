@@ -9,8 +9,6 @@
 #include "util.h"
 
 namespace purr {
-  static void noop(const v8::FunctionCallbackInfo<v8::Value>&) {}
-
   void Module::getExports(v8::Local<v8::Name> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
     Module * module = static_cast<Module *>(v8::Local<v8::External>::Cast(
       info.Data()->ToObject()->GetInternalField(0)
@@ -151,27 +149,26 @@ namespace purr {
     v8::Script::Compile(context, source).ToLocalChecked()->Run(context).ToLocalChecked();
   }
 
-  v8::Local<v8::Function> Module::getExportedFunction(const char * name) {
+  v8::MaybeLocal<v8::Function> Module::getExportedFunction(const char * name) {
     v8::Local<v8::Value> localExports = v8::Local<v8::Value>::New(isolate, exports);
+    v8::MaybeLocal<v8::Function> none;
 
     if (!localExports->IsObject()) {
-      return v8::Function::New(context, noop).ToLocalChecked();
+      return none;
     }
 
     v8::Local<v8::Object> exportsObject = localExports->ToObject();
     v8::Local<v8::String> key = v8::String::NewFromUtf8(isolate, name);
+    v8::MaybeLocal<v8::Value> maybeField = exportsObject->Get(key);
 
-    if (!exportsObject->Has(key)) {
-      return v8::Function::New(context, noop).ToLocalChecked();
+    if (maybeField.IsEmpty() || !(maybeField.ToLocalChecked()->IsFunction())) {
+      return none;
     }
 
-    v8::Local<v8::Value> field = exportsObject->Get(key);
+    v8::Local<v8::Function> func = v8::Local<v8::Function>::Cast(maybeField.ToLocalChecked());
+    v8::MaybeLocal<v8::Function> maybe(func);
 
-    if (!field->IsFunction()) {
-      return v8::Function::New(context, noop).ToLocalChecked();
-    }
-
-    return v8::Local<v8::Function>::Cast(field);
+    return maybe;
   }
 
   void Module::Feed(const char * key, Feeder * feeder) {
@@ -202,20 +199,36 @@ namespace purr {
     return (dirPath / relativePath).make_absolute().str();
   }
 
+  void MainModule::Dispatch(Event& event) {
+    v8::Context::Scope context_scope(context);
+    v8::MaybeLocal<v8::Function> maybeFunc = getExportedFunction("dispatch");
+
+    if (!maybeFunc.IsEmpty()) {
+      v8::Local<v8::Function> func = maybeFunc.ToLocalChecked();
+      func->Call(func, 0, NULL);
+    }
+  }
+
   void MainModule::Draw() {
     v8::Context::Scope context_scope(context);
-    v8::Local<v8::Function> func = getExportedFunction("draw");
+    v8::MaybeLocal<v8::Function> maybeFunc = getExportedFunction("draw");
 
-    func->Call(func, 0, NULL);
+    if (!maybeFunc.IsEmpty()) {
+      v8::Local<v8::Function> func = maybeFunc.ToLocalChecked();
+      func->Call(func, 0, NULL);
+    }
   }
 
   void MainModule::Update(unsigned dt) {
     v8::Context::Scope context_scope(context);
-    v8::Local<v8::Function> func = getExportedFunction("update");
+    v8::MaybeLocal<v8::Function> maybeFunc = getExportedFunction("update");
     v8::Handle<v8::Value> args[1];
 
     args[0] = v8::Number::New(isolate, dt);
 
-    func->Call(func, 1, args);
+    if (!maybeFunc.IsEmpty()) {
+      v8::Local<v8::Function> func = maybeFunc.ToLocalChecked();
+      func->Call(func, 1, args);
+    }
   }
 }
