@@ -31,7 +31,6 @@ namespace purr {
       static int runJobsLoop(void *);
 
     public:
-      Module * GetFromHolder(v8::Local<v8::Object>);
       Module * Save(std::string);
       void RunLoop();
       void PushJob(Job *);

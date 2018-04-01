@@ -71,12 +71,6 @@ namespace purr {
 
   Engine::Engine(std::string mainFilename) : mainFilename(mainFilename) {}
 
-  Module * Engine::GetFromHolder(v8::Local<v8::Object> root) {
-    std::string filename = Module::GetFilenameFromRoot(root);
-
-    return modules[filename];
-  }
-
   Module * Engine::Save(std::string filename) {
     if (modules.count(filename) == 0) {
       modules[filename] = new Module(isolate, filename, static_cast<Registry<Module> *>(this));
