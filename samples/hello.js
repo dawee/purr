@@ -23,6 +23,6 @@ const update = dt => {
   }
 };
 
-const draw = () => graphics.drawTexture(mallow, x, 0);
+const draw = () => graphics.drawTexture(mallow, x, 100, 100, 100, 110, 100);
 
 module.exports = {dispatch, draw, update};

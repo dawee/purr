@@ -23,7 +23,7 @@ namespace purr {
     public:
       void Load(SDLDisplay * display);
       bool IsLoaded();
-      void Draw(SDLDisplay *, int, int);
+      void Draw(SDLDisplay *, int, int, int, int, int, int);
       int Width();
       int Height();
 

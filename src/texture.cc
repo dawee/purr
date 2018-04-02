@@ -46,10 +46,32 @@ namespace purr {
     return isLoaded;
   }
 
-  void Texture::Draw(SDLDisplay * display, int x, int y) {
+  void Texture::Draw(
+    SDLDisplay * display,
+    int x,
+    int y,
+    int width,
+    int height,
+    int ox,
+    int oy
+  ) {
     if (SDL_LockMutex(mutex) == 0) {
       if (IsLoaded()) {
-        display->DrawSDLTexture(sdlTexture, x, y, width, height);
+        SDL_Rect src = {
+          .x = ox < 0 ? 0 : ox,
+          .y = ox < 0 ? 0 : oy,
+          .w = width < 0 ? this->width : width,
+          .h = height < 0 ? this->height : height
+        };
+
+        SDL_Rect dest = {
+          .x = x,
+          .y = y,
+          .w = width < 0 ? this->width : width,
+          .h = width < 0 ? this->width : width,
+        };
+
+        display->DrawSDLTexture(sdlTexture, src, dest);
       }
 
       SDL_UnlockMutex(mutex);

@@ -129,8 +129,12 @@ namespace purr {
     if (graphicsTexture != nullptr) {
       int x = info.Length() > 1 ? info[1]->Int32Value() : 0;
       int y = info.Length() > 2 ? info[2]->Int32Value() : 0;
+      int width = info.Length() > 3 ? info[3]->Int32Value() : -1;
+      int height = info.Length() > 4 ? info[4]->Int32Value() : -1;
+      int ox = info.Length() > 5 ? info[5]->Int32Value() : -1;
+      int oy = info.Length() > 6 ? info[6]->Int32Value() : -1;
 
-      graphicsTexture->texture->Draw(graphicsTexture->graphics->display, x, y);
+      graphicsTexture->texture->Draw(graphicsTexture->graphics->display, x, y, width, height, ox, oy);
     }
   }
 

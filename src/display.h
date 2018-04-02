@@ -15,8 +15,7 @@ namespace purr {
       void Clear();
       void Hide();
       void Render();
-      void DrawSDLTexture(SDL_Texture *, int, int, int, int);
-
+      void DrawSDLTexture(SDL_Texture *, SDL_Rect&, SDL_Rect&);
       SDL_Texture * CreateSDLTextureFromImage(std::string);
 
       SDLDisplay();
