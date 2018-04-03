@@ -105,6 +105,13 @@ namespace purr {
     display = new SDLDisplay();
     eventLoopActivated = true;
 
+    for (int joystickIndex = 0; joystickIndex < SDL_NumJoysticks(); ++joystickIndex) {
+      if (SDL_IsGameController(joystickIndex)) {
+        // @TODO manage controllers pointers
+        /* SDL_GameController * controller = */SDL_GameControllerOpen(joystickIndex);
+      }
+    }
+
     SDL_Thread * renderingThread = SDL_CreateThread(runRenderingLoop, "rendering-loop", engineInstancePtr);
     SDL_Thread * jobsThread = SDL_CreateThread(runJobsLoop, "jobs-loop", engineInstancePtr);
     SDL_Event sdlEvent;

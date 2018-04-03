@@ -8,6 +8,8 @@ let moving = false;
 const dispatch = event => {
   const {type, key} = event;
 
+  console.log(JSON.stringify(event));
+
   if (type === 'keydown' && key === 'Right') {
     moving = true;
   }

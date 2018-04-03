@@ -1,9 +1,13 @@
 #include "event.h"
 
+static const char * STR_AXIS = "axis";
+static const char * STR_VALUE = "value";
 static const char * STR_TYPE = "type";
+static const char * STR_KEY = "key";
+
 static const char * STR_KEYDOWN = "keydown";
 static const char * STR_KEYUP = "keyup";
-static const char * STR_KEY = "key";
+static const char * STR_CAXIS = "caxis";
 
 namespace purr {
   Event::Event() {}
@@ -14,6 +18,8 @@ namespace purr {
         return new KeydownEvent(sdlEvent);
       case SDL_KEYUP:
         return new KeyupEvent(sdlEvent);
+      case SDL_CONTROLLERAXISMOTION:
+        return new ControllerAxisEvent(sdlEvent);
       default:
         return nullptr;
     };
@@ -46,9 +52,7 @@ namespace purr {
     return jsEvent;
   }
 
-  KeydownEvent::KeydownEvent(SDL_Event& sdlEvent) : KeyboardEvent(sdlEvent) {
-    type = EventType::KEYDOWN;
-  }
+  KeydownEvent::KeydownEvent(SDL_Event& sdlEvent) : KeyboardEvent(sdlEvent) {}
 
   /*
    * KeyupEvent
@@ -64,7 +68,26 @@ namespace purr {
      return jsEvent;
    }
 
-   KeyupEvent::KeyupEvent(SDL_Event& sdlEvent) : KeyboardEvent(sdlEvent) {
-     type = EventType::KEYUP;
+   KeyupEvent::KeyupEvent(SDL_Event& sdlEvent) : KeyboardEvent(sdlEvent) {}
+
+   /*
+    * ControllerAxisEvent
+    */
+
+   v8::Local<v8::Object> ControllerAxisEvent::ToJS(v8::Isolate * isolate, v8::Local<v8::Context> context) {
+     v8::Context::Scope context_scope(context);
+     v8::Local<v8::Object> jsEvent = v8::Object::New(isolate);
+
+     jsEvent->Set(v8::String::NewFromUtf8(isolate, STR_TYPE), v8::String::NewFromUtf8(isolate, STR_CAXIS));
+     jsEvent->Set(v8::String::NewFromUtf8(isolate, STR_AXIS), v8::Number::New(isolate, axis));
+     jsEvent->Set(v8::String::NewFromUtf8(isolate, STR_VALUE), v8::Number::New(isolate, value));
+
+     return jsEvent;
    }
+
+   ControllerAxisEvent::ControllerAxisEvent(SDL_Event& event) {
+     axis = event.caxis.axis;
+     value = static_cast<double>(event.caxis.value) / 32767.0;
+   }
+
 }

@@ -5,15 +5,8 @@
 #include <v8/v8.h>
 
 namespace purr {
-  enum EventType {
-    KEYDOWN,
-    KEYUP
-  };
-
   class Event {
     protected:
-      EventType type;
-
       Event();
 
     public:
@@ -43,6 +36,17 @@ namespace purr {
       v8::Local<v8::Object> ToJS(v8::Isolate *, v8::Local<v8::Context>);
 
       KeyupEvent(SDL_Event& event);
+  };
+
+  class ControllerAxisEvent : public Event {
+    private:
+      int axis;
+      double value;
+
+    public:
+      v8::Local<v8::Object> ToJS(v8::Isolate *, v8::Local<v8::Context>);
+
+      ControllerAxisEvent(SDL_Event& event);
   };
 }
 

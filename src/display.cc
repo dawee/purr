@@ -43,6 +43,8 @@ namespace purr {
     background = SDL_CreateTextureFromSurface(renderer, surface);
     SDL_FreeSurface(surface);
     SDL_SetWindowBordered(window, SDL_TRUE);
+    SDL_InitSubSystem(SDL_INIT_JOYSTICK);
+    SDL_InitSubSystem(SDL_INIT_GAMECONTROLLER);
   }
 
   SDL_Texture * SDLDisplay::CreateSDLTextureFromImage(std::string filename) {
