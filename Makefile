@@ -2,6 +2,8 @@ UNAME := $(shell uname)
 INCLUDES := -I./deps/include -I./deps/include/v8 -I.
 SOURCES := $(wildcard src/*.cc)
 OBJECTS := $(patsubst src/%.cc,build/%.o,$(SOURCES))
+LIBS := $(wildcard lib/*.js)
+DIST_LIBS := $(patsubst lib/%.js,dist/lib/purr/%.js,$(LIBS))
 
 ifeq ($(UNAME), Linux)
 	CXX := g++
@@ -41,7 +43,7 @@ V8_OBJECTS = \
 SDL2_OBJECTS = $(wildcard deps/SDL2-2.0.8/build/*.o)
 SDL2_IMAGE_OBJECTS = $(wildcard deps/SDL2_image-2.0.3/build/*.o)
 
-all: dist/bin/purr
+all: ${DIST_LIBS} dist/bin/purr
 
 re: clean all
 
@@ -55,10 +57,15 @@ build/%.o: src/%.cc
 	@echo $@
 	@${CXX} -c $< -o $@ ${CXX_FLAGS}
 
+dist/lib/purr/%.js: lib/%.js
+	@echo $@
+	@mkdir -p dist/lib/purr
+	@cp $< $@
+
 clean:
 	@rm -rf build dist
 
 deps:
-	@make -C deps all
+	@make -s -C deps all
 
 .PHONY: deps

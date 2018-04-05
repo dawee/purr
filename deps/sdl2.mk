@@ -1,5 +1,5 @@
 release: Makefile
-	@make
+	@make -s
 
 Makefile:
 	@./configure
