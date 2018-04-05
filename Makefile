@@ -41,12 +41,12 @@ V8_OBJECTS = \
 SDL2_OBJECTS = $(wildcard deps/SDL2-2.0.8/build/*.o)
 SDL2_IMAGE_OBJECTS = $(wildcard deps/SDL2_image-2.0.3/build/*.o)
 
-all: dist/purr
+all: dist/bin/purr
 
 re: clean all
 
-dist/purr: deps ${OBJECTS}
-	@mkdir -p dist
+dist/bin/purr: deps ${OBJECTS}
+	@mkdir -p dist/bin
 	@echo $@
 	@${CXX} ${V8_OBJECTS} ${SDL2_OBJECTS} ${SDL2_IMAGE_OBJECTS} ${OBJECTS} -o $@ ${CXX_FLAGS} ${LDFLAGS}
 
