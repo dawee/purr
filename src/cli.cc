@@ -10,9 +10,8 @@ int main(int argc, char * argv[]) {
     return 1;
   }
 
-  filesystem::path currentPath(".");
   std::string entryName(argv[1]);
-  purr::Engine engine(entryName, currentPath.make_absolute().str());
+  purr::Engine engine(entryName, filesystem::path::getcwd().str());
 
   return engine.RunLoop();
 }
