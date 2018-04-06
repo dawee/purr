@@ -49,7 +49,7 @@ namespace purr {
 
       engine->graphics = new Graphics(engine->isolate, engine->display, static_cast<Worker *>(engine));
       engine->console = new Console(engine->isolate);
-      engine->main = static_cast<MainModule *>(engine->Save(engine->mainFilename));
+      engine->main = static_cast<MainModule *>(engine->FindAbsolute(engine->mainFilename));
 
       while (engine->eventLoopActivated) {
         Event * event;
@@ -106,7 +106,7 @@ namespace purr {
     main = nullptr;
   }
 
-  Module * Engine::Save(std::string filename) {
+  Module * Engine::FindAbsolute(std::string filename) {
     if (modules.count(filename) == 0) {
       modules[filename] = new Module(isolate, filename, static_cast<Registry<Module> *>(this));
 
@@ -168,25 +168,25 @@ namespace purr {
       filesystem::path fullPackageMainPath(fullPath / mainRelativePath);
 
       if (fullPackageMainPath.is_file()) {
-        return Save(fullPackageMainPath.make_absolute().str());
+        return FindAbsolute(fullPackageMainPath.make_absolute().str());
       }
     }
 
     if (fullPath.is_file()) {
-      return Save(fullPath.make_absolute().str());
+      return FindAbsolute(fullPath.make_absolute().str());
     }
 
     filesystem::path fullPathJS(fullPath.str() + ".js");
 
     if (fullPathJS.is_file()) {
-      return Save(fullPathJS.make_absolute().str());
+      return FindAbsolute(fullPathJS.make_absolute().str());
     }
 
     filesystem::path indexName("index.js");
     filesystem::path fullPathIndexJS(fullPath / indexName);
 
     if (fullPathIndexJS.is_file()) {
-      return Save(fullPathIndexJS.make_absolute().str());
+      return FindAbsolute(fullPathIndexJS.make_absolute().str());
     }
   }
 
