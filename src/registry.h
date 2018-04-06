@@ -7,7 +7,7 @@ namespace purr {
   template <class T> class Registry {
     public:
       virtual T * FindAbsolute(std::string) = 0;
-      virtual T * FindRelative(v8::Local<v8::Context>, std::string, std::string) = 0;
+      virtual T * FindRelative(std::string, std::string) = 0;
   };
 }
 

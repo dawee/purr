@@ -67,7 +67,7 @@ namespace purr {
     }
 
     std::string relativePath = ValueToSTDString(info[0]);
-    Module * foundModule = module->registry->FindRelative(module->context, relativePath, module->dir());
+    Module * foundModule = module->registry->FindRelative(relativePath, module->dir());
 
     if (foundModule != nullptr) {
       info.GetReturnValue().Set(foundModule->localExports());

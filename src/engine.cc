@@ -118,7 +118,8 @@ namespace purr {
     return modules[filename];
   }
 
-  Module * Engine::FindRelative(v8::Local<v8::Context> context, std::string filename, std::string dirname) {
+  Module * Engine::FindRelative(std::string filename, std::string dirname) {
+    v8::Local<v8::Context> context = v8::Context::New(isolate);
     v8::Context::Scope context_scope(context);
 
     filesystem::path dirPath(dirname);
