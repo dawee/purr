@@ -25,6 +25,7 @@ namespace purr {
 
       v8::Local<v8::Value> localExports();
       std::string dir();
+      Module * getRelative(std::string);
 
     protected:
       v8::Isolate* isolate;
