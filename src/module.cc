@@ -67,82 +67,10 @@ namespace purr {
     }
 
     std::string relativePath = ValueToSTDString(info[0]);
-    Module * foundModule = module->findRelative(relativePath);
+    Module * foundModule = module->registry->FindRelative(module->context, relativePath, module->dir());
 
     if (foundModule != nullptr) {
       info.GetReturnValue().Set(foundModule->localExports());
-    }
-  }
-
-  Module * Module::findRelative(std::string relativePath) {
-    v8::Context::Scope context_scope(context);
-
-    filesystem::path dirPath(dir());
-    filesystem::path fullPath(dirPath / relativePath);
-    filesystem::path packageName("package.json");
-    filesystem::path fullPathPackageJSON(fullPath / packageName);
-    std::string packageData;
-
-    if (fullPathPackageJSON.is_file() && readFile(fullPathPackageJSON.make_absolute().str(), packageData)) {
-      v8::MaybeLocal<v8::Value> maybePackage = v8::JSON::Parse(
-        context,
-        v8::String::NewFromUtf8(isolate, packageData.c_str())
-      );
-
-      if (maybePackage.IsEmpty()) {
-        std::cerr << "Failed to parse " << fullPathPackageJSON.make_absolute().str() << std::endl;
-        return nullptr;
-      }
-
-      v8::Local<v8::Value> package = maybePackage.ToLocalChecked();
-
-      if (!package->IsObject()) {
-        std::cerr << "Bad package format : " << fullPathPackageJSON.make_absolute().str() << std::endl;
-        return nullptr;
-      }
-
-      std::string mainScriptName;
-      v8::MaybeLocal<v8::Value> maybeMainScriptValue = package->ToObject()->Get(
-        context,
-        v8::String::NewFromUtf8(isolate, "main")
-      );
-
-      if (maybeMainScriptValue.IsEmpty()) {
-        mainScriptName = "index.js";
-      } else if (!maybeMainScriptValue.ToLocalChecked()->IsString()) {
-        std::cerr << "Bad main value found in : " << fullPathPackageJSON.make_absolute().str() << std::endl;
-        return nullptr;
-      } else {
-        v8::String::Utf8Value utf8MainName(
-          maybeMainScriptValue.ToLocalChecked()->ToString(context).ToLocalChecked()
-        );
-
-        mainScriptName = std::string(*utf8MainName);
-      }
-
-      filesystem::path mainRelativePath(mainScriptName);
-      filesystem::path fullPackageMainPath(fullPath / mainRelativePath);
-
-      if (fullPackageMainPath.is_file()) {
-        return registry->Save(fullPackageMainPath.make_absolute().str());
-      }
-    }
-
-    if (fullPath.is_file()) {
-      return registry->Save(fullPath.make_absolute().str());
-    }
-
-    filesystem::path fullPathJS(fullPath.str() + ".js");
-
-    if (fullPathJS.is_file()) {
-      return registry->Save(fullPathJS.make_absolute().str());
-    }
-
-    filesystem::path indexName("index.js");
-    filesystem::path fullPathIndexJS(fullPath / indexName);
-
-    if (fullPathIndexJS.is_file()) {
-      return registry->Save(fullPathIndexJS.make_absolute().str());
     }
   }
 

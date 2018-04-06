@@ -33,6 +33,8 @@ namespace purr {
 
     public:
       Module * Save(std::string);
+      Module * FindRelative(v8::Local<v8::Context>, std::string, std::string);
+
       void RunLoop();
       void PushJob(Job *);
 
