@@ -9,6 +9,24 @@
 #include "util.h"
 
 namespace purr {
+  static bool readFile(std::string filename, std::string& data) {
+    std::ifstream file;
+
+    file.open(filename);
+
+    if (!file.is_open()) {
+      return false;
+    }
+
+    file.seekg(0, std::ios::end);
+    data.reserve(file.tellg());
+    file.seekg(0, std::ios::beg);
+    data.assign((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+    file.close();
+
+    return true;
+  }
+
   void Module::getExports(v8::Local<v8::Name> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
     Module * module = static_cast<Module *>(v8::Local<v8::External>::Cast(
       info.Data()->ToObject()->GetInternalField(0)
@@ -48,9 +66,62 @@ namespace purr {
       return;
     }
 
+    v8::Context::Scope context_scope(module->context);
+
     std::string relativePath = ValueToSTDString(info[0]);
     filesystem::path dirPath(module->dir());
     filesystem::path fullPath(dirPath / relativePath);
+
+    filesystem::path packageName("package.json");
+    filesystem::path fullPathPackageJSON(fullPath / packageName);
+    std::string packageData;
+
+    if (fullPathPackageJSON.is_file() && readFile(fullPathPackageJSON.make_absolute().str(), packageData)) {
+      v8::MaybeLocal<v8::Value> maybePackage = v8::JSON::Parse(
+        module->context,
+        v8::String::NewFromUtf8(module->isolate, packageData.c_str())
+      );
+
+      if (maybePackage.IsEmpty()) {
+        std::cerr << "Failed to parse " << fullPathPackageJSON.make_absolute().str() << std::endl;
+        return;
+      }
+
+      v8::Local<v8::Value> package = maybePackage.ToLocalChecked();
+
+      if (!package->IsObject()) {
+        std::cerr << "Bad package format : " << fullPathPackageJSON.make_absolute().str() << std::endl;
+        return;
+      }
+
+      std::string mainScriptName;
+      v8::MaybeLocal<v8::Value> maybeMainScriptValue = package->ToObject()->Get(
+        module->context,
+        v8::String::NewFromUtf8(module->isolate, "main")
+      );
+
+      if (maybeMainScriptValue.IsEmpty()) {
+        mainScriptName = "index.js";
+      } else if (!maybeMainScriptValue.ToLocalChecked()->IsString()) {
+        std::cerr << "Bad main value found in : " << fullPathPackageJSON.make_absolute().str() << std::endl;
+        return;
+      } else {
+        v8::String::Utf8Value utf8MainName(
+          maybeMainScriptValue.ToLocalChecked()->ToString(module->context).ToLocalChecked()
+        );
+
+        mainScriptName = std::string(*utf8MainName);
+      }
+
+      filesystem::path mainRelativePath(mainScriptName);
+      filesystem::path fullPackageMainPath(fullPath / mainRelativePath);
+
+      if (fullPackageMainPath.is_file()) {
+        Module * requiredModule = module->registry->Save(fullPackageMainPath.make_absolute().str());
+        info.GetReturnValue().Set(requiredModule->localExports());
+        return;
+      }
+    }
 
     if (fullPath.is_file()) {
       Module * requiredModule = module->registry->Save(fullPath.make_absolute().str());
@@ -121,22 +192,12 @@ namespace purr {
   }
 
   void Module::Run() {
-    std::ifstream scriptFile;
+    std::string scriptSource;
 
-    scriptFile.open(filename);
-
-    if (!scriptFile.is_open()) {
+    if (!readFile(filename, scriptSource)) {
       std::cerr << "could not find module " << filename << std::endl;
       return;
     }
-
-    std::string scriptSource;
-
-    scriptFile.seekg(0, std::ios::end);
-    scriptSource.reserve(scriptFile.tellg());
-    scriptFile.seekg(0, std::ios::beg);
-    scriptSource.assign((std::istreambuf_iterator<char>(scriptFile)), std::istreambuf_iterator<char>());
-    scriptFile.close();
 
     v8::Context::Scope context_scope(context);
 
