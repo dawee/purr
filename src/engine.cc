@@ -49,7 +49,7 @@ namespace purr {
 
       engine->graphics = new Graphics(engine->isolate, engine->display, static_cast<Worker *>(engine));
       engine->console = new Console(engine->isolate);
-      engine->main = static_cast<MainModule *>(engine->FindAbsolute(engine->mainFilename));
+      engine->main = static_cast<MainModule *>(engine->FindRelative(engine->mainFilename, engine->currentDir));
 
       while (engine->eventLoopActivated) {
         Event * event;
@@ -102,7 +102,10 @@ namespace purr {
     return 0;
   }
 
-  Engine::Engine(std::string mainFilename) : mainFilename(mainFilename) {
+  Engine::Engine(
+    std::string mainFilename,
+    std::string currentDir
+  ) : mainFilename(mainFilename), currentDir(currentDir) {
     main = nullptr;
   }
 
@@ -191,7 +194,7 @@ namespace purr {
     }
   }
 
-  void Engine::RunLoop() {
+  int Engine::RunLoop() {
     void * engineInstancePtr = static_cast<void *>(this);
     unsigned int quitEngineRequestTime = 0;
 
@@ -231,6 +234,8 @@ namespace purr {
     jobsQueue.Push(new NoopJob());
     SDL_WaitThread(jobsThread, NULL);
     SDL_WaitThread(renderingThread, NULL);
+
+    return 0;
   }
 
   void Engine::PushJob(Job * job) {

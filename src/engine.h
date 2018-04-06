@@ -24,6 +24,7 @@ namespace purr {
       std::map<std::string, Module *> modules;
       MainModule * main;
       std::string mainFilename;
+      std::string currentDir;
       bool eventLoopActivated;
       Queue<Job> jobsQueue;
       Queue<Event> eventsQueue;
@@ -34,11 +35,10 @@ namespace purr {
     public:
       Module * FindAbsolute(std::string);
       Module * FindRelative(std::string, std::string);
-
-      void RunLoop();
+      int RunLoop();
       void PushJob(Job *);
 
-      Engine(std::string);
+      Engine(std::string, std::string);
   };
 
 }
