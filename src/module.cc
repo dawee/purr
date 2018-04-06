@@ -67,14 +67,14 @@ namespace purr {
     }
 
     std::string relativePath = ValueToSTDString(info[0]);
-    Module * foundModule = module->getRelative(relativePath);
+    Module * foundModule = module->findRelative(relativePath);
 
     if (foundModule != nullptr) {
       info.GetReturnValue().Set(foundModule->localExports());
     }
   }
 
-  Module * Module::getRelative(std::string relativePath) {
+  Module * Module::findRelative(std::string relativePath) {
     v8::Context::Scope context_scope(context);
 
     filesystem::path dirPath(dir());
