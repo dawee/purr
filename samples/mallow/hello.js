@@ -1,5 +1,7 @@
 const {updateX} = require('./update');
 
+require('engine');
+
 const mallow = graphics.loadTexture(`${__dirname__}/asset/mallow.png`);
 
 let x = 0;

@@ -35,6 +35,8 @@ namespace purr {
     public:
       Module * FindAbsolute(std::string);
       Module * FindRelative(std::string, std::string);
+      Module * Resolve(std::string, std::string);
+
       int RunLoop();
       void PushJob(Job *);
 

@@ -8,6 +8,7 @@ namespace purr {
     public:
       virtual T * FindAbsolute(std::string) = 0;
       virtual T * FindRelative(std::string, std::string) = 0;
+      virtual T * Resolve(std::string, std::string) = 0;
   };
 }
 

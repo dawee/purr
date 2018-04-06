@@ -49,7 +49,7 @@ namespace purr {
 
       engine->graphics = new Graphics(engine->isolate, engine->display, static_cast<Worker *>(engine));
       engine->console = new Console(engine->isolate);
-      engine->main = static_cast<MainModule *>(engine->FindRelative(engine->mainFilename, engine->currentDir));
+      engine->main = static_cast<MainModule *>(engine->Resolve(engine->mainFilename, engine->currentDir));
 
       while (engine->eventLoopActivated) {
         Event * event;
@@ -192,6 +192,22 @@ namespace purr {
     if (fullPathIndexJS.is_file()) {
       return FindAbsolute(fullPathIndexJS.make_absolute().str());
     }
+  }
+
+  Module * Engine::Resolve(std::string query, std::string dirname) {
+    filesystem::path queryPath(query);
+
+    if (queryPath.filename() == query) {
+      Module * module = nullptr;
+      filesystem::path binPath(SDL_GetBasePath());
+      filesystem::path nativeLibsPath(binPath.parent_path() / "lib" / "purr");
+
+      module = FindRelative(query, nativeLibsPath.str());
+
+      return module;
+    }
+
+    return FindRelative(query, dirname);
   }
 
   int Engine::RunLoop() {
