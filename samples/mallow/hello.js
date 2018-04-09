@@ -6,24 +6,22 @@ const mallow = graphics.loadTexture(`${__dirname__}/asset/mallow.png`);
 let x = 0;
 let moving = false;
 
-const dispatch = event => {
-  const {type, key} = event;
-
-  console.log(JSON.stringify(event));
-
-  if (type === 'keydown' && key === 'Right') {
+engine.on('keydown', ({key}) => {
+  if (key === 'Right') {
     moving = true;
   }
+});
 
-  if (type === 'keyup' && key === 'Right') {
+engine.on('keyup', ({key}) => {
+  if (key === 'Right') {
     moving = false;
   }
-};
+});
 
 engine.on('update', ({dt}) => {
-  //if (moving) {
+  if (moving) {
     x = updateX(dt, x);
-  //}
+  }
 });
 
 engine.on('draw', () => graphics.drawTexture(mallow, x, 100, 100, 100, 110, 100));
