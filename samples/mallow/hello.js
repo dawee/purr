@@ -9,13 +9,13 @@ let x = 0;
 let moving = false;
 
 engine.on('keydown', ({key}) => {
-  if (key === 'Right') {
+  if (key === 'right') {
     moving = true;
   }
 });
 
 engine.on('keyup', ({key}) => {
-  if (key === 'Right') {
+  if (key === 'right') {
     moving = false;
   }
 });
