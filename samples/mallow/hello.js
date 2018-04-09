@@ -1,34 +1,27 @@
 const engine = require('engine');
 const graphics = require('graphics');
 
-const {updateX} = require('./update');
+const {updateX} = require('./update/update-x');
 
-const mallow = graphics.loadTexture(`${__dirname__}/asset/mallow.png`);
+const runSample = async () => {
+  let x = 0;
+  let movingRight = false;
 
-let x = 0;
-let moving = false;
+  const mallow = await graphics.loadTexture(`${__dirname__}/asset/mallow.png`);
 
-engine.on('keydown', ({key}) => {
-  if (key === 'right') {
-    moving = true;
-  }
-});
+  engine.on('keydown', ({key}) => {
+    movingRight = (key === 'right') || movingRight;
+  });
 
-engine.on('keyup', ({key}) => {
-  if (key === 'right') {
-    moving = false;
-  }
-});
+  engine.on('keyup', ({key}) => {
+    movingRight = !(key === 'right') && movingRight;
+  });
 
-engine.on('update', ({dt}) => {
-  if (moving) {
-    x = updateX(dt, x);
-  }
-});
+  engine.on('update', ({dt}) => {
+    x = movingRight ? updateX(dt, x) : x;
+  });
 
-engine.on('draw', () => graphics.drawTexture(mallow, x, 100, {
-  width: 100,
-  height: 100,
-  ox: 100,
-  oy: 110,
-}));
+  engine.on('draw', () => graphics.drawTexture(mallow, x, 100));
+};
+
+runSample();
