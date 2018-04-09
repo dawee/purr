@@ -20,10 +20,10 @@ const dispatch = event => {
   }
 };
 
-const update = dt => {
-  if (moving) {
+engine.on('update', ({dt}) => {
+  //if (moving) {
     x = updateX(dt, x);
-  }
-};
+  //}
+});
 
 engine.on('draw', () => graphics.drawTexture(mallow, x, 100, 100, 100, 110, 100));
