@@ -1,4 +1,6 @@
 const engine = require('engine');
+const graphics = require('graphics');
+
 const {updateX} = require('./update');
 
 const mallow = graphics.loadTexture(`${__dirname__}/asset/mallow.png`);
@@ -24,4 +26,9 @@ engine.on('update', ({dt}) => {
   }
 });
 
-engine.on('draw', () => graphics.drawTexture(mallow, x, 100, 100, 100, 110, 100));
+engine.on('draw', () => graphics.drawTexture(mallow, x, 100, {
+  width: 100,
+  height: 100,
+  ox: 100,
+  oy: 110,
+}));

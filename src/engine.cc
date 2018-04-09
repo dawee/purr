@@ -116,7 +116,7 @@ namespace purr {
     if (modules.count(filename) == 0) {
       modules[filename] = new Module(isolate, filename, static_cast<Registry<Module> *>(this));
 
-      modules[filename]->Feed("graphics", static_cast<Feeder *>(graphics));
+      modules[filename]->Feed("_graphics", static_cast<Feeder *>(graphics));
       modules[filename]->Feed("console", static_cast<Feeder *>(console));
       modules[filename]->Run();
     }
