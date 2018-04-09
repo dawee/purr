@@ -49,6 +49,9 @@ namespace purr {
 
       engine->graphics = new Graphics(engine->isolate, engine->display, static_cast<Worker *>(engine));
       engine->console = new Console(engine->isolate);
+
+      MainModule * entry = static_cast<MainModule *>(engine->Resolve("_entry", engine->currentDir));
+
       engine->main = static_cast<MainModule *>(engine->Resolve(engine->mainFilename, engine->currentDir));
 
       while (engine->eventLoopActivated) {
@@ -58,7 +61,7 @@ namespace purr {
           event = engine->eventsQueue.PullWithoutWaiting();
 
           if (event != nullptr) {
-            engine->main->Dispatch(*event);
+            entry->Dispatch(*event);
             delete event;
           }
         } while (event != nullptr);
@@ -70,9 +73,9 @@ namespace purr {
           currentUpdateTime = SDL_GetTicks();
         }
 
-        engine->main->Update(currentUpdateTime - lastUpdateTime);
+        entry->Update(currentUpdateTime - lastUpdateTime);
         engine->display->Clear();
-        engine->main->Draw();
+        entry->Draw();
         engine->display->Render();
 
         lastUpdateTime = currentUpdateTime;

@@ -1,6 +1,5 @@
+const engine = require('engine');
 const {updateX} = require('./update');
-
-require('engine');
 
 const mallow = graphics.loadTexture(`${__dirname__}/asset/mallow.png`);
 
@@ -27,6 +26,4 @@ const update = dt => {
   }
 };
 
-const draw = () => graphics.drawTexture(mallow, x, 100, 100, 100, 110, 100);
-
-module.exports = {dispatch, draw, update};
+engine.on('draw', () => graphics.drawTexture(mallow, x, 100, 100, 100, 110, 100));
