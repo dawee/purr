@@ -4,3 +4,4 @@ dist
 deps/*
 !deps/Makefile
 !deps/*.mk
+node_modules

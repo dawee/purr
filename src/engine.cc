@@ -195,6 +195,8 @@ namespace purr {
     if (fullPathIndexJS.is_file()) {
       return FindAbsolute(fullPathIndexJS.make_absolute().str());
     }
+
+    return nullptr;
   }
 
   Module * Engine::Resolve(std::string query, std::string dirname) {
@@ -207,7 +209,14 @@ namespace purr {
 
       module = FindRelative(query, nativeLibsPath.str());
 
-      return module;
+      if (module != nullptr) {
+        return module;
+      }
+
+      filesystem::path currentPath(currentDir);
+      filesystem::path nodeModulesPath(currentPath / "node_modules");
+
+      return FindRelative(query, nodeModulesPath.str());
     }
 
     return FindRelative(query, dirname);

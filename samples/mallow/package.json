@@ -1,3 +1,6 @@
 {
-  "main": "hello.js"
+  "main": "hello.js",
+  "dependencies": {
+    "hat": "0.0.3"
+  }
 }
