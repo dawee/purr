@@ -199,7 +199,7 @@ namespace purr {
     return nullptr;
   }
 
-  Module * Engine::Resolve(std::string query, std::string dirname) {
+  Module * Engine::resolve(std::string query, std::string dirname, bool feedWithNatives) {
     filesystem::path queryPath(query);
 
     if (queryPath.filename() == query) {
@@ -220,6 +220,10 @@ namespace purr {
     }
 
     return FindRelative(query, dirname);
+  }
+
+  Module * Engine::Resolve(std::string query, std::string dirname) {
+    return resolve(query, dirname, true);
   }
 
   int Engine::RunLoop() {

@@ -32,6 +32,8 @@ namespace purr {
       static int runRenderingLoop(void *);
       static int runJobsLoop(void *);
 
+      Module * resolve(std::string, std::string, bool);
+
     public:
       Module * FindAbsolute(std::string);
       Module * FindRelative(std::string, std::string);
