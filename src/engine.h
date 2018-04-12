@@ -15,6 +15,8 @@
 
 namespace purr {
 
+  class NativeFeeder;
+
   class Engine : public Worker, public Registry<Module> {
     private:
       v8::Isolate * isolate;
@@ -28,21 +30,29 @@ namespace purr {
       bool eventLoopActivated;
       Queue<Job> jobsQueue;
       Queue<Event> eventsQueue;
+      NativeFeeder * nativeConsoleFeeder;
 
       static int runRenderingLoop(void *);
       static int runJobsLoop(void *);
 
       Module * resolve(std::string, std::string, bool);
+      Module * findAbsolute(std::string, bool);
+      Module * findRelative(std::string, std::string, bool);
 
     public:
-      Module * FindAbsolute(std::string);
-      Module * FindRelative(std::string, std::string);
       Module * Resolve(std::string, std::string);
 
       int RunLoop();
       void PushJob(Job *);
 
       Engine(std::string, std::string);
+
+      friend class NativeFeeder;
+  };
+
+  class NativeFeeder : public Feeder {
+    public:
+      NativeFeeder(Engine *, const char *);
   };
 
 }

@@ -32,7 +32,7 @@ namespace purr {
       info.Data()->ToObject()->GetInternalField(0)
     )->Value());
 
-    info.GetReturnValue().Set(module->localExports());
+    info.GetReturnValue().Set(module->Exports());
   }
 
   void Module::setExports(v8::Local<v8::Name> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void> &info) {
@@ -70,7 +70,7 @@ namespace purr {
     Module * foundModule = module->registry->Resolve(relativePath, module->dir());
 
     if (foundModule != nullptr) {
-      info.GetReturnValue().Set(foundModule->localExports());
+      info.GetReturnValue().Set(foundModule->Exports());
     }
   }
 
@@ -165,7 +165,7 @@ namespace purr {
     feeder->FeedObject(key, v8::Local<v8::Object>::New(isolate, root));
   }
 
-  v8::Local<v8::Value> Module::localExports() {
+  v8::Local<v8::Value> Module::Exports() {
     return v8::Local<v8::Value>::New(isolate, exports);
   }
 

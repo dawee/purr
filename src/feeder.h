@@ -7,7 +7,7 @@ namespace purr {
   class Feeder {
     protected:
       v8::Isolate * isolate;
-      v8::Persistent<v8::Object> root;
+      v8::Persistent<v8::Value> root;
       v8::Local<v8::Context> context;
 
     public:

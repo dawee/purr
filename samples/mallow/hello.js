@@ -1,10 +1,6 @@
 const engine = require('engine');
 const graphics = require('graphics');
 
-const hat = require('hat');
-
-console.log(hat());
-
 const {updateX} = require('./update/update-x');
 
 const runSample = async () => {

@@ -6,8 +6,6 @@
 namespace purr {
   template <class T> class Registry {
     public:
-      virtual T * FindAbsolute(std::string) = 0;
-      virtual T * FindRelative(std::string, std::string) = 0;
       virtual T * Resolve(std::string, std::string) = 0;
   };
 }

@@ -23,7 +23,6 @@ namespace purr {
       static void getModule(v8::Local<v8::Name>, const v8::PropertyCallbackInfo<v8::Value>&);
       static void require(const v8::FunctionCallbackInfo<v8::Value>&);
 
-      v8::Local<v8::Value> localExports();
       std::string dir();
       Module * findRelative(std::string);
 
@@ -39,6 +38,7 @@ namespace purr {
       void Run();
       void Feed(const char *, Feeder *);
       std::string ResolveRelativePath(const char *);
+      v8::Local<v8::Value> Exports();
 
       Module(v8::Isolate *, std::string, Registry<Module> * reg);
   };

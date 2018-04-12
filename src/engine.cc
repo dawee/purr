@@ -47,8 +47,14 @@ namespace purr {
       v8::Isolate::Scope isolate_scope(engine->isolate);
       v8::HandleScope handle_scope(engine->isolate);
 
+      /* Bindings */
       engine->graphics = new Graphics(engine->isolate, engine->display, static_cast<Worker *>(engine));
       engine->console = new Console(engine->isolate);
+
+      /* Natives */
+      engine->nativeConsoleFeeder = new NativeFeeder(engine, "console");
+
+      /* Scripts */
 
       MainModule * entry = static_cast<MainModule *>(engine->Resolve("_entry", engine->currentDir));
 
@@ -112,19 +118,24 @@ namespace purr {
     main = nullptr;
   }
 
-  Module * Engine::FindAbsolute(std::string filename) {
+  Module * Engine::findAbsolute(std::string filename, bool feedWithNatives) {
     if (modules.count(filename) == 0) {
-      modules[filename] = new Module(isolate, filename, static_cast<Registry<Module> *>(this));
+      modules[filename] = new Module(isolate, filename, this);
 
-      modules[filename]->Feed("_graphics", static_cast<Feeder *>(graphics));
-      modules[filename]->Feed("console", static_cast<Feeder *>(console));
+      modules[filename]->Feed("_graphics", graphics);
+      modules[filename]->Feed("_console", console);
+
+      if (feedWithNatives) {
+        modules[filename]->Feed("console", nativeConsoleFeeder);
+      }
+
       modules[filename]->Run();
     }
 
     return modules[filename];
   }
 
-  Module * Engine::FindRelative(std::string filename, std::string dirname) {
+  Module * Engine::findRelative(std::string filename, std::string dirname, bool feedWithNatives) {
     v8::Local<v8::Context> context = v8::Context::New(isolate);
     v8::Context::Scope context_scope(context);
 
@@ -175,25 +186,25 @@ namespace purr {
       filesystem::path fullPackageMainPath(fullPath / mainRelativePath);
 
       if (fullPackageMainPath.is_file()) {
-        return FindAbsolute(fullPackageMainPath.make_absolute().str());
+        return findAbsolute(fullPackageMainPath.make_absolute().str(), feedWithNatives);
       }
     }
 
     if (fullPath.is_file()) {
-      return FindAbsolute(fullPath.make_absolute().str());
+      return findAbsolute(fullPath.make_absolute().str(), feedWithNatives);
     }
 
     filesystem::path fullPathJS(fullPath.str() + ".js");
 
     if (fullPathJS.is_file()) {
-      return FindAbsolute(fullPathJS.make_absolute().str());
+      return findAbsolute(fullPathJS.make_absolute().str(), feedWithNatives);
     }
 
     filesystem::path indexName("index.js");
     filesystem::path fullPathIndexJS(fullPath / indexName);
 
     if (fullPathIndexJS.is_file()) {
-      return FindAbsolute(fullPathIndexJS.make_absolute().str());
+      return findAbsolute(fullPathIndexJS.make_absolute().str(), feedWithNatives);
     }
 
     return nullptr;
@@ -207,7 +218,7 @@ namespace purr {
       filesystem::path binPath(SDL_GetBasePath());
       filesystem::path nativeLibsPath(binPath.parent_path() / "lib" / "purr");
 
-      module = FindRelative(query, nativeLibsPath.str());
+      module = findRelative(query, nativeLibsPath.str(), feedWithNatives);
 
       if (module != nullptr) {
         return module;
@@ -216,10 +227,10 @@ namespace purr {
       filesystem::path currentPath(currentDir);
       filesystem::path nodeModulesPath(currentPath / "node_modules");
 
-      return FindRelative(query, nodeModulesPath.str());
+      return findRelative(query, nodeModulesPath.str(), feedWithNatives);
     }
 
-    return FindRelative(query, dirname);
+    return findRelative(query, dirname, feedWithNatives);
   }
 
   Module * Engine::Resolve(std::string query, std::string dirname) {
@@ -272,5 +283,15 @@ namespace purr {
 
   void Engine::PushJob(Job * job) {
     jobsQueue.Push(job);
+  }
+
+  NativeFeeder::NativeFeeder(Engine * engine, const char * name) : Feeder(engine->isolate) {
+    Module * nativeModule = engine->resolve(name, engine->currentDir, false);
+
+    if (nativeModule != nullptr) {
+      v8::Context::Scope context_scope(context);
+
+      root.Reset(isolate, nativeModule->Exports());
+    }
   }
 }
