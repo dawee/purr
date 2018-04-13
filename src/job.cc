@@ -1,25 +1,34 @@
 #include "job.h"
 
 namespace purr {
-  Job::Job(unsigned type) : type(type) {}
-  void Job::Run() {}
+  NoopJob::NoopJob() {}
 
-  NoopJob::NoopJob() : Job(JobType::NOOP) {}
-  void NoopJob::Run() {}
+  JobStatus NoopJob::Run(v8::Persistent<v8::Value>& exception) {
+    return JOB_STATUS_OK;
+  }
 
   LoadTextureJob::LoadTextureJob(
     SDLDisplay * display,
     Texture * texture
-  ) : Job(JobType::LOAD_TEXTURE), display(display), texture(texture) {}
+  ) : display(display), texture(texture) {}
 
-  void LoadTextureJob::Run() {
+  JobStatus LoadTextureJob::Run(v8::Persistent<v8::Value>& exception) {
     texture->Load(display);
+    return JOB_STATUS_OK;
   }
 
-  DestroyTextureJob::DestroyTextureJob(Texture * texture) : Job(JobType::DESTROY_TEXTURE), texture(texture) {}
+  DestroyTextureJob::DestroyTextureJob(Texture * texture) : texture(texture) {}
 
-  void DestroyTextureJob::Run() {
+  JobStatus DestroyTextureJob::Run(v8::Persistent<v8::Value>& exception) {
     delete texture;
+    return JOB_STATUS_OK;
   }
 
+  RaiseExceptionJob::RaiseExceptionJob(v8::Isolate * isolate, v8::Local<v8::Value> exception) {
+    this->exception.Reset(isolate, exception);
+  }
+
+  JobStatus RaiseExceptionJob::Run(v8::Persistent<v8::Value>& exception) {
+    return JOB_STATUS_EXCEPTION;
+  }
 }

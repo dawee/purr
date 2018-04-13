@@ -1,32 +1,26 @@
 #ifndef PURR_JOB_H
 #define PURR_JOB_H
 
+#include <v8/v8.h>
+
 #include "display.h"
 #include "texture.h"
 
 namespace purr {
-  enum JobType {
-    NOOP,
-    LOAD_TEXTURE,
-    DESTROY_TEXTURE
+  enum JobStatus {
+    JOB_STATUS_OK,
+    JOB_STATUS_EXCEPTION
   };
 
   class Job {
-    private:
-      unsigned type;
-
-    protected:
-      Job(unsigned);
-
     public:
-      unsigned Type();
-      virtual void Run();
+      virtual JobStatus Run(v8::Persistent<v8::Value>&) = 0;
   };
 
   class NoopJob : public Job {
     public:
       NoopJob();
-      void Run();
+      JobStatus Run(v8::Persistent<v8::Value>&);
   };
 
   class LoadTextureJob : public Job {
@@ -36,7 +30,7 @@ namespace purr {
 
     public:
       LoadTextureJob(SDLDisplay * display, Texture *);
-      void Run();
+      JobStatus Run(v8::Persistent<v8::Value>&);
   };
 
   class DestroyTextureJob : public Job {
@@ -45,7 +39,16 @@ namespace purr {
 
     public:
       DestroyTextureJob(Texture *);
-      void Run();
+      JobStatus Run(v8::Persistent<v8::Value>&);
+  };
+
+  class RaiseExceptionJob : public Job {
+    private:
+      v8::Persistent<v8::Value> exception;
+
+    public:
+      RaiseExceptionJob(v8::Isolate *, v8::Local<v8::Value>);
+      JobStatus Run(v8::Persistent<v8::Value>&);
   };
 }
 

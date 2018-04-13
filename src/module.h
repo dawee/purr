@@ -7,6 +7,7 @@
 #include "event.h"
 #include "feeder.h"
 #include "registry.h"
+#include "worker.h"
 
 namespace purr {
 
@@ -17,6 +18,7 @@ namespace purr {
       v8::Persistent<v8::Object> console;
       v8::Persistent<v8::Object> root;
       Registry<Module> * registry;
+      Worker * worker;
 
       static void getExports(v8::Local<v8::Name>, const v8::PropertyCallbackInfo<v8::Value>&);
       static void setExports(v8::Local<v8::Name>, v8::Local<v8::Value>, const v8::PropertyCallbackInfo<void>&);
@@ -40,7 +42,7 @@ namespace purr {
       std::string ResolveRelativePath(const char *);
       v8::Local<v8::Value> Exports();
 
-      Module(v8::Isolate *, std::string, Registry<Module> * reg);
+      Module(v8::Isolate *, std::string, Registry<Module> * reg, Worker * worker);
   };
 
   class MainModule : public Module {

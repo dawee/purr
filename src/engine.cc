@@ -101,7 +101,12 @@ namespace purr {
       Job * job = engine->jobsQueue.Pull();
 
       if (job != nullptr) {
-        job->Run();
+        if (job->Run(engine->exception) == JOB_STATUS_EXCEPTION) {
+          std::cout << "quit with exception" << std::endl;
+          engine->raisedException = true;
+          engine->eventLoopActivated = false;
+        }
+
         delete job;
       } else {
         SDL_Delay(2 * FRAME_DURATION);
@@ -116,11 +121,12 @@ namespace purr {
     std::string currentDir
   ) : mainFilename(mainFilename), currentDir(currentDir) {
     main = nullptr;
+    raisedException = false;
   }
 
   Module * Engine::findAbsolute(std::string filename, bool feedWithNatives) {
     if (modules.count(filename) == 0) {
-      modules[filename] = new Module(isolate, filename, this);
+      modules[filename] = new Module(isolate, filename, this, this);
 
       modules[filename]->Feed("_graphics", graphics);
       modules[filename]->Feed("_console", console);

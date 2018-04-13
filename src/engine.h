@@ -31,6 +31,8 @@ namespace purr {
       Queue<Job> jobsQueue;
       Queue<Event> eventsQueue;
       NativeFeeder * nativeConsoleFeeder;
+      v8::Persistent<v8::Value> exception;
+      bool raisedException;
 
       static int runRenderingLoop(void *);
       static int runJobsLoop(void *);

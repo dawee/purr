@@ -6,6 +6,7 @@
 
 #include "module.h"
 #include "engine.h"
+#include "job.h"
 #include "util.h"
 
 namespace purr {
@@ -77,8 +78,9 @@ namespace purr {
   Module::Module(
     v8::Isolate * isolate,
     std::string filename,
-    Registry<Module> * registry
-  ) : isolate(isolate), filename(filename), registry(registry) {
+    Registry<Module> * registry,
+    Worker * worker
+  ) : isolate(isolate), filename(filename), registry(registry), worker(worker) {
     v8::Local<v8::ObjectTemplate> moduleTemplate = v8::ObjectTemplate::New(isolate);
     moduleTemplate->SetInternalFieldCount(1);
 
@@ -127,6 +129,7 @@ namespace purr {
     }
 
     v8::Context::Scope context_scope(context);
+    v8::TryCatch trycatch(isolate);
 
     v8::Local<v8::String> source = v8::String::NewFromUtf8(
       isolate,
@@ -134,7 +137,14 @@ namespace purr {
       v8::NewStringType::kNormal
     ).ToLocalChecked();
 
-    v8::Script::Compile(context, source).ToLocalChecked()->Run(context).ToLocalChecked();
+    v8::MaybeLocal<v8::Value> result = v8::Script::Compile(context, source).ToLocalChecked()->Run(context);
+
+    if (result.IsEmpty()) {
+      v8::Local<v8::Value> exception = trycatch.Exception();
+      RaiseExceptionJob * job = new RaiseExceptionJob(isolate, exception);
+
+      worker->PushJob(job);
+    }
   }
 
   v8::MaybeLocal<v8::Function> Module::getExportedFunction(const char * name) {
